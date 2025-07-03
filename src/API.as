@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-07-02
+// m 2025-07-03
 
 namespace API {
     namespace Nadeo {
@@ -8,79 +8,116 @@ namespace API {
         uint64       lastRequest   = 0;
         const uint64 waitTime      = 500;
 
-        Json::Value@ GetDivisionDisplayRulesAsync() {
-            Json::Value@ response = GetMeetAsync("matchmaking/ranked-2v2/division/display-rules");
+        void CancelQueueAsync() {
+            State::cancel = true;
+            Log::Info("API::Nadeo::CancelQueueAsync", "canceling queue");
+            PostMeetAsync("/matchmaking/ranked-2v2/cancel");
+        }
 
-            if (true
-                and response !is null
-                and response.GetType() == Json::Type::Object
-            ) {
-                return response;
+        Json::Value@ GetDivisionDisplayRulesAsync() {
+            const string funcName = "API::Nadeo::GetDivisionDisplayRulesAsync";
+
+            const string endpoint = "/matchmaking/ranked-2v2/division/display-rules";
+            Json::Value@ response = GetMeetAsync(endpoint);
+
+            Log::Debug(funcName, endpoint + " | " + Json::Write(response));
+
+            if (response !is null) {
+                Log::ResponseToFile(funcName, response);
+
+                if (response.GetType() == Json::Type::Object) {
+                    return response;
+                }
             }
 
-            warn("GetDivisionDisplayRulesAsync | bad response: " + Json::Write(response));
+            Log::Error(funcName, "bad response");
             return null;
         }
 
         Json::Value@ GetLeaderboardPlayersAsync(const string[]@ accountIDs) {
-            Json::Value@ response = GetMeetAsync("matchmaking/ranked-2v2/leaderboard/players?players[]=" + string::Join(accountIDs, "&players[]="));
+            const string funcName = "API::Nadeo::GetLeaderboardPlayersAsync";
 
-            if (true
-                and response !is null
-                and response.GetType() == Json::Type::Object
-            ) {
-                return response;
-            }
-
-            warn("GetLeaderboardPlayersAsync | bad response: " + Json::Write(response));
-            return null;
-        }
-
-        Json::Value@ GetMatchInfoAsync() {
-            if (matchID.Length == 0) {
-                warn("GetMatchInfoAsync | no match ID");
+            if (accountIDs.Length == 0) {
+                Log::Warning(funcName, "accountIDs empty");
                 return null;
             }
 
-            Json::Value@ response = GetMeetAsync("matches/" + matchID);
+            const string endpoint = "/matchmaking/ranked-2v2/leaderboard/players?players[]=" + string::Join(accountIDs, "&players[]=");
+            Json::Value@ response = GetMeetAsync(endpoint);
 
-            if (true
-                and response !is null
-                and response.GetType() == Json::Type::Object
-            ) {
-                return response;
+            Log::Debug(funcName, endpoint + " | " + Json::Write(response));
+
+            if (response !is null) {
+                Log::ResponseToFile(funcName, response);
+
+                if (response.GetType() == Json::Type::Object) {
+                    return response;
+                }
             }
 
-            warn("GetMatchInfoAsync | bad response: " + Json::Write(response));
+            Log::Error(funcName, "bad response");
+            return null;
+        }
+
+        Json::Value@ GetMatchInfoAsync(const string&in liveId) {
+            const string funcName = "API::Nadeo::GetMatchInfoAsync";
+
+            if (liveId.Length == 0) {
+                Log::Warning(funcName, "liveId blank");
+                return null;
+            }
+
+            const string endpoint = "/matches/" + liveId;
+            Json::Value@ response = GetMeetAsync(endpoint);
+
+            Log::Debug(funcName, endpoint + " | " + Json::Write(response));
+
+            if (response !is null) {
+                Log::ResponseToFile(funcName, response);
+
+                if (response.GetType() == Json::Type::Object) {
+                    return response;
+                }
+            }
+
+            Log::Error(funcName, "bad response");
             return null;
         }
 
         Json::Value@ GetMeetAsync(const string&in endpoint) {
+            const string funcName = "API::Nadeo::GetMeetAsync";
+
             Net::HttpRequest@ req = NadeoServices::Get(
                 audienceLive,
-                NadeoServices::BaseURLMeet() + "/api/" + endpoint
+                NadeoServices::BaseURLMeet() + "/api/" + (endpoint.StartsWith("/") ? endpoint.SubStr(1) : endpoint)
             );
             StartRequestAsync(req);
 
             try {
                 return req.Json();
             } catch {
-                error("API::Nadeo::GetMeetAsync | " + endpoint + " | " + getExceptionInfo());
+                Log::Error(funcName, endpoint + " | " + getExceptionInfo());
                 return null;
             }
         }
 
         Json::Value@ GetPlayerStatusAsync() {
-            Json::Value@ response = GetMeetAsync("matchmaking/ranked-2v2/player-status");
+            const string funcName = "API::Nadeo::GetPlayerStatusAsync";
 
-            if (true
-                and response !is null
-                and response.GetType() == Json::Type::Object
-            ) {
-                return response;
+            const string endpoint = "/matchmaking/ranked-2v2/player-status";
+            Json::Value@ response = GetMeetAsync(endpoint);
+
+            Log::Debug(funcName, endpoint + " | " + Json::Write(response));
+
+            if (response !is null) {
+                Log::ResponseToFile(funcName, response);
+
+                if (response.GetType() == Json::Type::Object) {
+                    return response;
+                }
             }
 
-            warn("GetPlayerStatusAsync | bad response: " + Json::Write(response));
+            Log::Error(funcName, "bad response");
             return null;
         }
 
@@ -92,9 +129,11 @@ namespace API {
         }
 
         Json::Value@ PostMeetAsync(const string&in endpoint, const string&in body = "") {
+            const string funcName = "API::Nadeo::PostMeetAsync";
+
             Net::HttpRequest@ req = NadeoServices::Post(
                 audienceLive,
-                NadeoServices::BaseURLMeet() + "/api/" + endpoint,
+                NadeoServices::BaseURLMeet() + "/api/" + (endpoint.StartsWith("/") ? endpoint.SubStr(1) : endpoint),
                 body
             );
             StartRequestAsync(req);
@@ -102,30 +141,31 @@ namespace API {
             try {
                 return req.Json();
             } catch {
-                error("API::Nadeo::PostMeetAsync | " + endpoint + " | " + getExceptionInfo());
+                Log::Error(funcName, endpoint + " | " + body + " | " + getExceptionInfo());
                 return null;
             }
         }
 
         Json::Value@ SendHeartbeatAsync() {
-            Json::Value@ response = PostMeetAsync("matchmaking/ranked-2v2/heartbeat", '{"code":"","playWith":[]}');
+            const string funcName = "API::Nadeo::SendHeartbeatAsync";
+            const string endpoint = "/matchmaking/ranked-2v2/heartbeat";
+            const string body = '{"code":"","playWith":[]}';  // party code would go here
+
+            Json::Value@ response = PostMeetAsync(endpoint, body);
             lastHeartbeat = Time::Now;
 
-            if (true
-                and response !is null
-                and response.GetType() == Json::Type::Object
-            ) {
-                return response;
+            Log::Debug(funcName, endpoint + " | " + Json::Write(response));
+
+            if (response !is null) {
+                Log::ResponseToFile(funcName, response);
+
+                if (response.GetType() == Json::Type::Object) {
+                    return response;
+                }
             }
 
-            warn("SendHeartbeatAsync | bad response: " + Json::Write(response));
+            Log::Error(funcName, "bad response");
             return null;
-        }
-
-        void SendQueueCancelAsync() {
-            cancel = true;
-            warn("cancelling queue");
-            PostMeetAsync("matchmaking/ranked-2v2/cancel");
         }
 
         void StartRequestAsync(Net::HttpRequest@ req) {

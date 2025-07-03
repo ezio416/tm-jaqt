@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-07-02
+// m 2025-07-03
 
 const string[] divisionNames = {
     "Unknown",
@@ -60,7 +60,7 @@ class Division {
         ) {
             position = uint(json["position"]);
         } else {
-            warn("Division | error with 'position'");
+            Log::Warning("Division", "error with 'position'");
         }
 
         if (true
@@ -70,7 +70,7 @@ class Division {
             name = divisionNames[position];
             shortName = divisionShortNames[position];
         } else {
-            warn("Division | unknown position: " + position);
+            Log::Warning("Division", "unknown position: " + position);
         }
 
         if (true
@@ -86,7 +86,7 @@ class Division {
                 type = DivisionRuleType::PointsRange;
             }
         } else {
-            warn("Division | error with 'displayRuleType'");
+            Log::Warning("Division", "error with 'displayRuleType'");
         }
 
         if (true
@@ -95,7 +95,7 @@ class Division {
         ) {
             minimumPoints = uint(json["displayRuleMinimumPoints"]);
         } else {
-            warn("Division | error with 'displayRuleMinimumPoints'");
+            Log::Warning("Division", "error with 'displayRuleMinimumPoints'");
         }
 
         if (true
@@ -104,7 +104,7 @@ class Division {
         ) {
             maximumPoints = uint(json["displayRuleMaximumPoints"]);
         } else if (type == DivisionRuleType::PointsRange) {
-            warn("Division | error with 'displayRuleMaximumPoints'");
+            Log::Warning("Division", "error with 'displayRuleMaximumPoints'");
         }
 
         if (true
@@ -113,7 +113,7 @@ class Division {
         ) {
             minimumRank = uint(json["displayRuleMinimumRank"]);
         } else if (type == DivisionRuleType::MinimumRankAndPoints) {
-            warn("Division | error with 'displayRuleMinimumRank'");
+            Log::Warning("Division", "error with 'displayRuleMinimumRank'");
         }
     }
 
@@ -143,7 +143,7 @@ class Division {
         @icon = UI::LoadTexture(path);
 
         if (icon is null) {
-            warn("Division::LoadIcon | not found: " + path);
+            Log::Error("Division::LoadIcon", "not found: " + path);
         }
     }
 

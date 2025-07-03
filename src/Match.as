@@ -1,10 +1,19 @@
 // c 2025-07-02
 // m 2025-07-03
 
+enum MatchStatus {
+    Unknown,
+    PENDING,
+    ONGOING,
+    COMPLETED
+}
+
 class Match {
-    string joinLink;
-    string liveId;
-    string mapUid;
+    string      joinLink;
+    string      liveId;
+    string      mapUid;
+    string      serverLogin;
+    MatchStatus status = MatchStatus::Unknown;
 
     Match(Json::Value@ json) {
         if (true
@@ -12,6 +21,7 @@ class Match {
             and json["joinLink"].GetType() == Json::Type::String
         ) {
             joinLink = string(json["joinLink"]).Replace("#join=", "#qjoin=");
+            serverLogin = joinLink.Replace("#qjoin=", "").Replace("@Trackmania", "");
         }
 
         if (true
@@ -19,6 +29,23 @@ class Match {
             and json["liveId"].GetType() == Json::Type::String
         ) {
             liveId = string(json["liveId"]);
+        }
+
+        if (true
+            and json.HasKey("status")
+            and json["status"].GetType() == Json::Type::String
+        ) {
+            const string matchStatus = string(json["status"]);
+
+            if (matchStatus == "PENDING") {
+                status = MatchStatus::PENDING;
+            } else if (matchStatus == "ONGOING") {
+                status = MatchStatus::ONGOING;
+            } else if (matchStatus == "COMPLETED") {
+                status = MatchStatus::COMPLETED;
+            } else {
+                Log::Warning("Match", "unknown status: " + matchStatus);
+            }
         }
 
         if (true
@@ -33,12 +60,23 @@ class Match {
         }
     }
 
+    bool In() {
+        auto App = cast<CTrackMania>(GetApp());
+        auto Network = cast<CTrackManiaNetwork>(App.Network);
+        auto ServerInfo = cast<CTrackManiaNetworkServerInfo>(Network.ServerInfo);
+
+        return true
+            and ServerInfo.ServerLogin.Length > 0
+            and ServerInfo.ServerLogin == serverLogin
+        ;
+    }
+
     bool JoinAsync() {
         if (joinLink.Length == 0) {
             return false;
         }
 
-        print("joining: " + joinLink);
+        Log::Info("Match::JoinAsync", "joining | " + joinLink);
 
         auto App = cast<CTrackMania>(GetApp());
 
@@ -53,21 +91,20 @@ class Match {
             yield();
         }
 
-        App.ManiaPlanetScriptAPI.OpenLink(
-            joinLink,
-            CGameManiaPlanetScriptAPI::ELinkType::ManialinkBrowser
-        );
+        App.ManiaPlanetScriptAPI.OpenLink(joinLink, CGameManiaPlanetScriptAPI::ELinkType::ManialinkBrowser);
 
-        status = QueueStatus::Joining;
+        State::status = State::Status::Joining;
+
         return true;
     }
 
     Json::Value@ ToJson() {
         Json::Value@ ret = Json::Object();
 
-        ret["joinLink"] = joinLink;
-        ret["liveId"]   = liveId;
-        ret["mapUid"]   = mapUid;
+        ret["joinLink"]    = joinLink;
+        ret["liveId"]      = liveId;
+        ret["mapUid"]      = mapUid;
+        ret["serverLogin"] = serverLogin;
 
         return ret;
     }

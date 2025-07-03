@@ -7,13 +7,13 @@ class Player {
     uint      immunityDays = 0;
     uint      matchPb      = 0;
     bool      mvp          = false;
-    bool      myself       = false;
     uint      pb           = 0;
     uint64    pbTimestamp  = 0;
     int       penalty      = 0;
     uint      points       = 0;
     uint      progression  = 0;
     uint      rank         = 0;
+    bool      self         = false;
 
     Division@ GetDivision() {
         @division = GetPlayerDivision(progression, rank);
@@ -28,13 +28,13 @@ class Player {
         ret["immunityDays"] = immunityDays;
         ret["matchPb"]      = matchPb;
         ret["mvp"]          = mvp;
-        ret["myself"]       = myself;
         ret["pb"]           = pb;
         ret["pbTimestamp"]  = pbTimestamp;
         ret["penalty"]      = penalty;
         ret["points"]       = points;
         ret["progression"]  = progression;
         ret["rank"]         = rank;
+        ret["self"]         = self;
 
         return ret;
     }
@@ -45,51 +45,45 @@ class Player {
 }
 
 void GetMyStatusAsync() {
-    try {
-        Json::Value@ response = API::Nadeo::GetPlayerStatusAsync();
-        print("GetMyStatusAsync | " + Json::Write(response, true));
+    const string funcName = "GetMyStatusAsync";
 
-        if (me is null) {
-            @me = Player();
-            me.myself = true;
-        }
+    Json::Value@ status = API::Nadeo::GetPlayerStatusAsync();
 
-        if (response.HasKey("currentHeartbeat")) {
-            // print("currentHeartbeat: " + Json::Write(response["currentHeartbeat"], true));
+    if (State::me is null) {
+        @State::me = Player();
+        State::me.self = true;
+    }
+
+    if (true
+        and status.HasKey("currentProgression")
+        and status["currentProgression"].GetType() == Json::Type::Number
+    ) {
+        State::me.progression = uint(status["currentProgression"]);
+        State::me.GetDivision();
+    }
+
+    if (status.HasKey("inactivity")) {
+        Json::Value@ inactivity = status["inactivity"];
+
+        if (true
+            and inactivity.HasKey("inactivityPenaltyEnabled")
+            and inactivity["inactivityPenaltyEnabled"].GetType() == Json::Type::Boolean
+        ) {
+            State::me.hasPenalty = bool(inactivity["inactivityPenaltyEnabled"]);
         }
 
         if (true
-            and response.HasKey("currentProgression")
-            and response["currentProgression"].GetType() == Json::Type::Number
+            and inactivity.HasKey("immunityDays")
+            and inactivity["immunityDays"].GetType() == Json::Type::Number
         ) {
-            me.progression = uint(response["currentProgression"]);
-            me.GetDivision();
+            State::me.immunityDays = uint(inactivity["immunityDays"]);
         }
 
-        if (response.HasKey("inactivity")) {
-            Json::Value@ inactivity = response["inactivity"];
-
-            if (inactivity.HasKey("inactivityPenaltyEnabled")) {
-                me.hasPenalty = bool(inactivity["inactivityPenaltyEnabled"]);
-
-                if (true
-                    and inactivity.HasKey("penalty")
-                    and inactivity["penalty"].GetType() == Json::Type::Number
-                ) {
-                    me.penalty = int(inactivity["penalty"]);
-                }
-            }
-
-            if (true
-                and inactivity.HasKey("immunityDays")
-                and inactivity["immunityDays"].GetType() == Json::Type::Number
-            ) {
-                me.immunityDays = uint(inactivity["immunityDays"]);
-            }
+        if (true
+            and inactivity.HasKey("penalty")
+            and inactivity["penalty"].GetType() == Json::Type::Number
+        ) {
+            State::me.penalty = int(inactivity["penalty"]);
         }
-
-    } catch {
-        error("GetMyStatusAsync | " + getExceptionInfo());
-        return;
     }
 }

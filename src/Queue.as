@@ -1,100 +1,88 @@
 // c 2025-07-02
 // m 2025-07-03
 
-enum QueueStatus {
-    None,
-    Queueing,
-    Queued,
-    MatchFound,
-    Joining,
-    InMatch
+void CancelQueueAsync() {
+    API::Nadeo::CancelQueueAsync();
 }
 
-void QueueAsync() {
-    if (status != QueueStatus::None) {
+void StartQueueAsync() {
+    const string funcName = "StartQueueAsync";
+
+    if (State::status != State::Status::None) {
+        Log::Warning(funcName, "can't start queue, status: " + tostring(State::status));
         return;
     }
 
-    status = QueueStatus::Queueing;
+    State::SetStatus(State::Status::Queueing);
 
     while (false
-        or status == QueueStatus::Queueing
-        or status == QueueStatus::Queued
+        or State::status == State::Status::Queueing
+        or State::status == State::Status::Queued
     ) {
-        if (cancel) {
-            cancel = false;
-            status = QueueStatus::None;
+        if (State::cancel) {
+            State::cancel = false;
+            State::SetStatus(State::Status::None);
             break;
         }
 
         Json::Value@ heartbeat = API::Nadeo::SendHeartbeatAsync();
-        print("heartbeat: " + Json::Write(heartbeat, true));
         if (heartbeat !is null) {
             if (true
                 and heartbeat.HasKey("status")
                 and heartbeat["status"].GetType() == Json::Type::String
             ) {
-                SetStatus(string(heartbeat["status"]));
+                State::SetStatus(string(heartbeat["status"]));
             }
 
             if (true
                 and heartbeat.HasKey("matchLiveId")
                 and heartbeat["matchLiveId"].GetType() == Json::Type::String
             ) {
-                matchID = string(heartbeat["matchLiveId"]);
+                const string liveId = string(heartbeat["matchLiveId"]);
+                Log::Info(funcName, "got match live ID: " + liveId);
 
                 while (true) {
-                    Json::Value@ matchInfo = API::Nadeo::GetMatchInfoAsync();
-                    print("match info: " + Json::Write(matchInfo, true));
+                    @State::match = Match(API::Nadeo::GetMatchInfoAsync(liveId));
 
-                    @match = Match(matchInfo);
-                    if (match.JoinAsync()) {
+                    if (State::match.JoinAsync()) {
+                        break;
+                    }
+
+                    Log::Info(funcName, "waiting for server...");
+
+                    sleep(5000);
+                }
+
+                while (!State::match.In()) {
+                    yield();
+                }
+
+                State::SetStatus(State::Status::InMatch);
+
+                while (true) {
+                    @State::match = Match(API::Nadeo::GetMatchInfoAsync(liveId));
+
+                    if (State::match.status == MatchStatus::COMPLETED) {
+                        Log::Info(funcName, "match completed");
                         break;
                     }
 
                     sleep(5000);
                 }
 
-                auto App = cast<CTrackMania>(GetApp());
-                auto Network = cast<CTrackManiaNetwork>(App.Network);
-                auto ServerInfo = cast<CTrackManiaNetworkServerInfo>(Network.ServerInfo);
-
-                while (ServerInfo.ServerLogin.Length == 0) {
-                    yield();
-                }
-
-                if (ServerInfo.ServerLogin == match.joinLink.Replace("#qjoin=", "").Replace("@Trackmania", "")) {
-                    status = QueueStatus::InMatch;
-                    break;
-                }
+                break;
             }
         }
 
         while (Time::Now - API::Nadeo::lastHeartbeat < 5000) {
             yield();
 
-            if (cancel) {
-                cancel = false;
+            if (State::cancel) {
+                State::cancel = false;
                 break;
             }
         }
     }
 
-    print("QueueAsync | end");
-}
-
-void QueueCancelAsync() {
-    API::Nadeo::SendQueueCancelAsync();
-}
-
-void SetStatus(const string&in s) {
-    if (s == "queued") {
-        status = QueueStatus::Queued;
-    } else if (s == "match_ready") {
-        status = QueueStatus::MatchFound;
-    } else if (s == "canceled") {
-        status = QueueStatus::None;
-    } else {
-        warn("SetStatus | unknown status: " + s);
-    }
+    Log::Info(funcName, "end");
 }

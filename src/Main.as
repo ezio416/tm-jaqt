@@ -6,23 +6,18 @@ const string  pluginIcon  = Icons::Gamepad;
 Meta::Plugin@ pluginMeta  = Meta::ExecutingPlugin();
 const string  pluginTitle = pluginColor + pluginIcon + "\\$G " + pluginMeta.Name;
 
-bool        cancel    = false;
 Division@[] divisions = { Division() };
-Match@      match;
-string      matchID;
-Player@     me;
-QueueStatus status    = QueueStatus::None;
 
 void OnDestroyed() {
-    switch (status) {
-        case QueueStatus::Queueing:
-        case QueueStatus::Queued:
-            warn("OnDestroyed | cancelling queue");
+    switch (State::status) {
+        case State::Status::Queueing:
+        case State::Status::Queued:
+            Log::Warning("OnDestroyed", "canceling queue");
 
             NadeoServices::Post(
                 API::Nadeo::audienceLive,
                 NadeoServices::BaseURLMeet() + "/api/matchmaking/ranked-2v2/cancel"
-            ).Start();
+            ).Start();  // Openplanet throws a warning but it's fine
     }
 }
 
@@ -34,6 +29,7 @@ void Main() {
     API::Nadeo::InitAsync();
 
     if (!GetDivisionsAsync()) {
+        Log::Critical("Main", "failed to get divisions");
         return;
     }
 
@@ -59,17 +55,17 @@ void Render() {
 
         UI::Separator();
 
-        if (me !is null) {
-            UI::TextWrapped(Json::Write(me.ToJson(), true));
+        if (State::me !is null) {
+            UI::TextWrapped(Json::Write(State::me.ToJson(), true));
         }
 
         UI::Separator();
 
-        UI::Text("status: " + tostring(status));
+        UI::Text("status: " + tostring(State::status));
 
-        UI::BeginDisabled(status != QueueStatus::None);
+        UI::BeginDisabled(State::status != State::Status::None);
         if (UI::Button("start queue")) {
-            startnew(QueueAsync);
+            startnew(StartQueueAsync);
         }
         UI::EndDisabled();
 
@@ -78,7 +74,7 @@ void Render() {
         //     and status != QueueStatus::Queued
         // );
         if (UI::Button("cancel")) {
-            startnew(QueueCancelAsync);
+            startnew(CancelQueueAsync);
         }
         // UI::EndDisabled();
 
