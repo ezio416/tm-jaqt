@@ -2,18 +2,19 @@
 // m 2025-07-03
 
 void CancelQueueAsync() {
-    API::Nadeo::CancelQueueAsync();
+    Http::Nadeo::CancelQueueAsync();
 }
 
 void StartQueueAsync() {
     const string funcName = "StartQueueAsync";
 
-    if (State::status != State::Status::None) {
+    if (State::status != State::Status::NotQueued) {
         Log::Warning(funcName, "can't start queue, status: " + tostring(State::status));
         return;
     }
 
     State::SetStatus(State::Status::Queueing);
+    State::queueStart = Time::Now;
 
     while (false
         or State::status == State::Status::Queueing
@@ -21,11 +22,11 @@ void StartQueueAsync() {
     ) {
         if (State::cancel) {
             State::cancel = false;
-            State::SetStatus(State::Status::None);
+            State::SetStatus(State::Status::NotQueued);
             break;
         }
 
-        Json::Value@ heartbeat = API::Nadeo::SendHeartbeatAsync();
+        Json::Value@ heartbeat = Http::Nadeo::SendHeartbeatAsync();
         if (heartbeat !is null) {
             if (true
                 and heartbeat.HasKey("status")
@@ -41,8 +42,10 @@ void StartQueueAsync() {
                 const string liveId = string(heartbeat["matchLiveId"]);
                 Log::Info(funcName, "got match live ID: " + liveId);
 
+                PlaySound();
+
                 while (true) {
-                    @State::match = Match(API::Nadeo::GetMatchInfoAsync(liveId));
+                    @State::match = Match(Http::Nadeo::GetMatchInfoAsync(liveId));
 
                     if (State::match.JoinAsync()) {
                         break;
@@ -60,10 +63,11 @@ void StartQueueAsync() {
                 State::SetStatus(State::Status::InMatch);
 
                 while (true) {
-                    @State::match = Match(API::Nadeo::GetMatchInfoAsync(liveId));
+                    @State::match = Match(Http::Nadeo::GetMatchInfoAsync(liveId));
 
                     if (State::match.status == MatchStatus::COMPLETED) {
                         Log::Info(funcName, "match completed");
+                        State::SetStatus(State::Status::NotQueued);
                         break;
                     }
 
@@ -74,7 +78,7 @@ void StartQueueAsync() {
             }
         }
 
-        while (Time::Now - API::Nadeo::lastHeartbeat < 5000) {
+        while (Time::Now - Http::Nadeo::lastHeartbeat < 5000) {
             yield();
 
             if (State::cancel) {

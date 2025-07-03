@@ -1,0 +1,105 @@
+// c 2025-07-03
+// m 2025-07-03
+
+void RenderMainTabs() {
+    UI::BeginTabBar("##tabbar-main");
+
+    RenderTabRanked();
+    RenderTabSettings();
+
+    if (S_Debug) {
+        RenderTabDebug();
+    }
+
+    UI::EndTabBar();
+}
+
+void RenderStatusBar() {
+    if (UI::BeginMenuBar()) {
+        string statusString = "\\$AAA" + tostring(State::status);
+
+        switch (State::status) {
+            case State::Status::Queueing:
+            case State::Status::Queued:
+                statusString += "  " + Time::Format(Time::Now - State::queueStart, false);
+        }
+
+        UI::Text(statusString);
+        UI::EndMenuBar();
+    }
+}
+
+void RenderTabDebug() {
+    if (!UI::BeginTabItem(Icons::Bug + " Debug")) {
+        return;
+    }
+
+    UI::BeginTabBar("##tabs-debug");
+
+    if (UI::BeginTabItem(Icons::User + " Me")) {
+        if (State::me !is null) {
+            UI::TextWrapped(Json::Write(State::me.ToJson(), true));
+        }
+
+        UI::EndTabItem();
+    }
+
+    if (UI::BeginTabItem(Icons::ListUl + " Divisions")) {
+        for (uint i = 0; i < divisions.Length; i++) {
+            divisions[i].RenderIcon(vec2(32.0f), true);
+            UI::SameLine();
+            UI::AlignTextToFramePadding();
+            UI::TextWrapped(tostring(divisions[i]));
+        }
+
+        UI::EndTabItem();
+    }
+
+    UI::EndTabBar();
+
+    UI::EndTabItem();
+}
+
+void RenderTabRanked() {
+    if (!UI::BeginTabItem(Icons::Trophy + " Ranked")) {
+        return;
+    }
+
+    if (State::me !is null) {
+        State::me.division.RenderIcon(vec2(48.0f * UI::GetScale()), true);
+
+        UI::SameLine();
+        UI::BeginGroup();
+        UI::Text("Points: " + State::me.progression);
+        UI::Text("Rank: " + State::me.rank);
+        UI::EndGroup();
+    }
+
+    UI::BeginDisabled(State::status != State::Status::NotQueued);
+    if (UI::Button(Icons::Play + " Queue")) {
+        startnew(StartQueueAsync);
+    }
+    UI::EndDisabled();
+
+    UI::SameLine();
+    UI::BeginDisabled(true
+        and State::status != State::Status::Queueing
+        and State::status != State::Status::Queued
+    );
+    if (UI::Button(Icons::Times + " Cancel")) {
+        startnew(CancelQueueAsync);
+    }
+    UI::EndDisabled();
+
+    UI::EndTabItem();
+}
+
+void RenderTabSettings() {
+    if (!UI::BeginTabItem(Icons::Cogs + " Settings")) {
+        return;
+    }
+
+    ;
+
+    UI::EndTabItem();
+}

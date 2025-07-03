@@ -2,6 +2,7 @@
 // m 2025-07-03
 
 class Player {
+    string    accountId;
     Division@ division     = Division();
     bool      hasPenalty   = false;
     uint      immunityDays = 0;
@@ -47,10 +48,12 @@ class Player {
 void GetMyStatusAsync() {
     const string funcName = "GetMyStatusAsync";
 
-    Json::Value@ status = API::Nadeo::GetPlayerStatusAsync();
+    Json::Value@ status = Http::Nadeo::GetPlayerStatusAsync();
 
     if (State::me is null) {
         @State::me = Player();
+
+        State::me.accountId = GetApp().LocalPlayerInfo.WebServicesUserId;
         State::me.self = true;
     }
 
@@ -85,5 +88,20 @@ void GetMyStatusAsync() {
         ) {
             State::me.penalty = int(inactivity["penalty"]);
         }
+    }
+
+    Json::Value@ leaderboard = Http::Nadeo::GetLeaderboardPlayersAsync({ State::me.accountId });
+
+    if (true
+        and leaderboard.HasKey("results")
+        and leaderboard["results"].GetType() == Json::Type::Array
+        and leaderboard["results"].Length > 0
+        and leaderboard["results"][0].GetType() == Json::Type::Object
+        and leaderboard["results"][0].HasKey("rank")
+        and leaderboard["results"][0]["rank"].GetType() == Json::Type::Number
+    ) {
+        State::me.rank = uint(leaderboard["results"][0]["rank"]);
+    } else {
+        Log::Warning(funcName, "error getting my rank");
     }
 }

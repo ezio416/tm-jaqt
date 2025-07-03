@@ -12,3 +12,9 @@ bool S_HideWithOP = false;
 
 [Setting category="General" name="Log level"]
 Log::Level S_LogLevel = Log::Level::Info;
+
+[Setting category="General" name="Show debug tab"]
+bool S_Debug = false;
+
+[Setting category="General" name="Notification volume" min=0.0f max=100.0f]
+float S_Volume = 30.0f;

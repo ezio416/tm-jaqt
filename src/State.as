@@ -2,13 +2,14 @@
 // m 2025-07-03
 
 namespace State {
-    bool    cancel = false;
+    bool    cancel      = false;
     Match@  match;
     Player@ me;
-    Status  status = Status::None;
+    uint64  queueStart = 0;
+    Status  status     = Status::NotQueued;
 
     enum Status {
-        None,
+        NotQueued,
         Queueing,
         Queued,
         MatchFound,
@@ -28,10 +29,10 @@ namespace State {
         } else if (s == "match_ready") {
             SetStatus(Status::MatchFound);
         } else if (s == "canceled") {
-            SetStatus(Status::None);
+            SetStatus(Status::NotQueued);
         } else {
             Log::Warning(funcName, "unknown status: " + s);
-            SetStatus(Status::None);
+            SetStatus(Status::NotQueued);
         }
     }
 }

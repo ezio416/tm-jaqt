@@ -186,7 +186,7 @@ class Division {
 
 bool GetDivisionsAsync() {
     try {
-        Json::Value@ response = API::Nadeo::GetDivisionDisplayRulesAsync()["divisions"];
+        Json::Value@ response = Http::Nadeo::GetDivisionDisplayRulesAsync()["divisions"];
 
         divisions = { Division() };
         for (uint i = 0; i < response.Length; i++) {

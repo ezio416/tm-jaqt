@@ -1,7 +1,7 @@
 // c 2025-07-02
 // m 2025-07-03
 
-namespace API {
+namespace Http {
     namespace Nadeo {
         const string audienceLive  = "NadeoLiveServices";
         uint64       lastHeartbeat = 0;
@@ -10,12 +10,12 @@ namespace API {
 
         void CancelQueueAsync() {
             State::cancel = true;
-            Log::Info("API::Nadeo::CancelQueueAsync", "canceling queue");
+            Log::Info("Http::Nadeo::CancelQueueAsync", "canceling queue");
             PostMeetAsync("/matchmaking/ranked-2v2/cancel");
         }
 
         Json::Value@ GetDivisionDisplayRulesAsync() {
-            const string funcName = "API::Nadeo::GetDivisionDisplayRulesAsync";
+            const string funcName = "Http::Nadeo::GetDivisionDisplayRulesAsync";
 
             const string endpoint = "/matchmaking/ranked-2v2/division/display-rules";
             Json::Value@ response = GetMeetAsync(endpoint);
@@ -34,15 +34,15 @@ namespace API {
             return null;
         }
 
-        Json::Value@ GetLeaderboardPlayersAsync(const string[]@ accountIDs) {
-            const string funcName = "API::Nadeo::GetLeaderboardPlayersAsync";
+        Json::Value@ GetLeaderboardPlayersAsync(const string[]@ accountIds) {
+            const string funcName = "Http::Nadeo::GetLeaderboardPlayersAsync";
 
-            if (accountIDs.Length == 0) {
-                Log::Warning(funcName, "accountIDs empty");
+            if (accountIds.Length == 0) {
+                Log::Warning(funcName, "accountIds empty");
                 return null;
             }
 
-            const string endpoint = "/matchmaking/ranked-2v2/leaderboard/players?players[]=" + string::Join(accountIDs, "&players[]=");
+            const string endpoint = "/matchmaking/ranked-2v2/leaderboard/players?players[]=" + string::Join(accountIds, "&players[]=");
             Json::Value@ response = GetMeetAsync(endpoint);
 
             Log::Debug(funcName, endpoint + " | " + Json::Write(response));
@@ -60,7 +60,7 @@ namespace API {
         }
 
         Json::Value@ GetMatchInfoAsync(const string&in liveId) {
-            const string funcName = "API::Nadeo::GetMatchInfoAsync";
+            const string funcName = "Http::Nadeo::GetMatchInfoAsync";
 
             if (liveId.Length == 0) {
                 Log::Warning(funcName, "liveId blank");
@@ -85,7 +85,7 @@ namespace API {
         }
 
         Json::Value@ GetMeetAsync(const string&in endpoint) {
-            const string funcName = "API::Nadeo::GetMeetAsync";
+            const string funcName = "Http::Nadeo::GetMeetAsync";
 
             Net::HttpRequest@ req = NadeoServices::Get(
                 audienceLive,
@@ -102,7 +102,7 @@ namespace API {
         }
 
         Json::Value@ GetPlayerStatusAsync() {
-            const string funcName = "API::Nadeo::GetPlayerStatusAsync";
+            const string funcName = "Http::Nadeo::GetPlayerStatusAsync";
 
             const string endpoint = "/matchmaking/ranked-2v2/player-status";
             Json::Value@ response = GetMeetAsync(endpoint);
@@ -129,7 +129,7 @@ namespace API {
         }
 
         Json::Value@ PostMeetAsync(const string&in endpoint, const string&in body = "") {
-            const string funcName = "API::Nadeo::PostMeetAsync";
+            const string funcName = "Http::Nadeo::PostMeetAsync";
 
             Net::HttpRequest@ req = NadeoServices::Post(
                 audienceLive,
@@ -147,7 +147,7 @@ namespace API {
         }
 
         Json::Value@ SendHeartbeatAsync() {
-            const string funcName = "API::Nadeo::SendHeartbeatAsync";
+            const string funcName = "Http::Nadeo::SendHeartbeatAsync";
             const string endpoint = "/matchmaking/ranked-2v2/heartbeat";
             const string body = '{"code":"","playWith":[]}';  // party code would go here
 
