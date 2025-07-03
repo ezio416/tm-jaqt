@@ -121,19 +121,29 @@ class Division {
     }
 
     void LoadIcon(const string&in path) {
-        if (IO::FileExists(path)) {
-            @icon = UI::LoadTexture(path);
-        } else {
+        @icon = UI::LoadTexture(path);
+
+        if (icon is null) {
             warn("Division::LoadIcon | not found: " + path);
         }
     }
 
-    void RenderIcon(const vec2&in size) {
-        if (icon is null) {
-            return;
-        }
+    void RenderIcon(const vec2&in size, bool hover = false) {
+        if (icon !is null) {
+            UI::Image(icon, size);
 
-        UI::Image(icon, size);
+            if (true
+                and hover
+                and UI::IsItemHovered()
+            ) {
+                UI::BeginTooltip();
+                UI::Image(icon, icon.GetSize());
+                UI::EndTooltip();
+            }
+
+        } else {
+            UI::Dummy(size);
+        }
     }
 
     string ToString() {
@@ -172,12 +182,19 @@ Division@ GetDivision(const uint points, const uint rank = 0) {
 bool GetDivisionsAsync() {
     try {
         Json::Value@ response = API::Nadeo::GetMeetAsync("matchmaking/ranked-2v2/division/display-rules")["divisions"];
+
         divisions = { Division() };
         for (uint i = 0; i < response.Length; i++) {
             divisions.InsertLast(Division(response[i]));
         }
         divisions.Sort(function(a, b) { return a.position < b.position; });
+
+        for (uint i = 0; i < divisions.Length; i++) {
+            divisions[i].LoadIcon("assets/" + divisions[i].position + ".png");
+        }
+
         return true;
+
     } catch {
         error("Divisions::GetAsync | " + getExceptionInfo());
         return false;

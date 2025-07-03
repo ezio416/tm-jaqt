@@ -4,16 +4,15 @@
 namespace API {
     namespace Nadeo {
         const string audienceLive = "NadeoLiveServices";
+        uint64       lastRequest  = 0;
+        const uint64 waitTime     = 500;
 
         Json::Value@ GetMeetAsync(const string&in endpoint) {
             Net::HttpRequest@ req = NadeoServices::Get(
                 audienceLive,
                 NadeoServices::BaseURLMeet() + "/api/" + endpoint
             );
-            req.Start();
-            while (!req.Finished()) {
-                yield();
-            }
+            StartRequestAsync(req);
 
             try {
                 return req.Json();
@@ -36,10 +35,7 @@ namespace API {
                 NadeoServices::BaseURLMeet() + "/api/" + endpoint,
                 body
             );
-            req.Start();
-            while (!req.Finished()) {
-                yield();
-            }
+            StartRequestAsync(req);
 
             try {
                 return req.Json();
@@ -51,6 +47,22 @@ namespace API {
 
         Json::Value@ PostMeetAsync(const string&in endpoint, Json::Value@ body = null) {
             return PostMeetAsync(endpoint, Json::Write(body));
+        }
+
+        void StartRequestAsync(Net::HttpRequest@ req) {
+            WaitAsync();
+            req.Start();
+            while (!req.Finished()) {
+                yield();
+            }
+        }
+
+        void WaitAsync() {
+            uint64 now;
+            while ((now = Time::Now) - lastRequest < waitTime) {
+                yield();
+            }
+            lastRequest = now;
         }
     }
 }

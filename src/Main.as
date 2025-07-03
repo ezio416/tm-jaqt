@@ -15,7 +15,7 @@ void Main() {
         return;
     }
 
-    ;
+    print(Json::Write(API::Nadeo::GetMeetAsync("matchmaking/ranked-2v2/leaderboard/players?players[]=84505c99-31f7-461e-8e53-9214fe0a68f0")));
 }
 
 void Render() {
@@ -29,6 +29,9 @@ void Render() {
 
     if (UI::Begin(pluginTitle, S_Enabled, UI::WindowFlags::None)) {
         for (uint i = 0; i < divisions.Length; i++) {
+            divisions[i].RenderIcon(vec2(32.0f), true);
+            UI::SameLine();
+            UI::AlignTextToFramePadding();
             UI::Text(tostring(divisions[i]));
         }
     }
