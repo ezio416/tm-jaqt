@@ -62,17 +62,73 @@ void StartQueueAsync() {
 
                 State::SetStatus(State::Status::InMatch);
 
+                auto App = cast<CTrackMania>(GetApp());
+                uint playerCount = 0;
+
                 while (true) {
+                    if (cast<CSmArenaClient>(App.CurrentPlayground) !is null) {
+                        if (playerCount != App.CurrentPlayground.Players.Length) {
+                            Log::Debug(funcName, "player count changed: " + playerCount);
+
+                            playerCount = App.CurrentPlayground.Players.Length;
+                            State::players.DeleteAll();
+                            State::playersArr = {};
+
+                            string[] accountIds;
+
+                            for (uint i = 0; i < App.CurrentPlayground.Players.Length; i++) {
+                                auto player = Player(cast<CSmPlayer>(App.CurrentPlayground.Players[i]));
+                                if (player.accountId.Length > 0) {
+                                    State::playersArr.InsertLast(player);
+                                    State::players.Set(player.accountId, @player);
+
+                                    accountIds.InsertLast(player.accountId);
+                                }
+                            }
+
+                            Json::Value@ leaderboard = Http::Nadeo::GetLeaderboardPlayersAsync(accountIds);
+                            if (leaderboard !is null) {
+                                if (leaderboard.HasKey("results")) {
+                                    Json::Value@ results = leaderboard["results"];
+                                    if (true
+                                        and results.GetType() == Json::Type::Array
+                                        and results.Length == accountIds.Length
+                                    ) {
+                                        for (uint i = 0; i < results.Length; i++) {
+                                            try {
+                                                auto player = cast<Player>(State::players[string(results[i]["player"])]);
+                                                player.rank        = uint(results[i]["rank"]);
+                                                player.progression = uint(results[i]["score"]);
+                                            } catch {
+                                                Log::Error(funcName, getExceptionInfo());
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Log::Error(funcName, "leaderboard error");
+                                }
+                            }
+                        }
+                    } else {
+                        State::players.DeleteAll();
+                        State::playersArr = {};
+                        playerCount = 0;
+                    }
+
                     @State::match = Match(Http::Nadeo::GetMatchInfoAsync(liveId));
 
                     if (State::match.status == MatchStatus::COMPLETED) {
                         Log::Info(funcName, "match completed");
                         State::SetStatus(State::Status::NotQueued);
+                        startnew(GetMyStatusAsync);
                         break;
                     }
 
                     sleep(5000);
                 }
+
+                State::players.DeleteAll();
+                State::playersArr = {};
 
                 break;
             }

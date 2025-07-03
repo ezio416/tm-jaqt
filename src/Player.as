@@ -2,40 +2,87 @@
 // m 2025-07-03
 
 class Player {
-    string    accountId;
-    Division@ division     = Division();
-    bool      hasPenalty   = false;
-    uint      immunityDays = 0;
-    uint      matchPb      = 0;
-    bool      mvp          = false;
-    uint      pb           = 0;
-    uint64    pbTimestamp  = 0;
-    int       penalty      = 0;
-    uint      points       = 0;
-    uint      progression  = 0;
-    uint      rank         = 0;
-    bool      self         = false;
+    string     accountId;
+    bool       hasPenalty   = false;
+    uint       immunityDays = 0;
+    uint       matchPb      = 0;
+    bool       mvp          = false;
+    string     name;
+    uint       pb           = 0;
+    uint64     pbTimestamp  = 0;
+    int        penalty      = 0;
+    uint       progression  = 0;
+    uint       rank         = 0;
+    uint       score        = 0;
+    bool       self         = false;
+    int        team         = -1;
 
-    Division@ GetDivision() {
-        @division = GetPlayerDivision(progression, rank);
-        return division;
+    Division@ get_division() {
+        return GetPlayerDivision(progression, rank);
+    }
+
+    uint get_score() {
+        auto Playground = cast<CSmArenaClient>(GetApp().CurrentPlayground);
+        if (Playground !is null) {
+            for (uint i = 0; i < Playground.Players.Length; i++) {
+                auto player = cast<CSmPlayer>(Playground.Players[i]);
+                if (true
+                    and player !is null
+                    and player.User !is null
+                    and player.User.WebServicesUserId == accountId
+                    and player.Score !is null
+                ) {
+                    return player.Score.Points;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    int get_team() {
+        auto Playground = cast<CSmArenaClient>(GetApp().CurrentPlayground);
+        if (Playground !is null) {
+            for (uint i = 0; i < Playground.Players.Length; i++) {
+                auto player = cast<CSmPlayer>(Playground.Players[i]);
+                if (true
+                    and player !is null
+                    and player.User !is null
+                    and player.User.WebServicesUserId == accountId
+                    and player.Score !is null
+                ) {
+                    return player.Score.TeamNum;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    Player() { }
+    Player(CSmPlayer@ player) {
+        accountId = player.User.WebServicesUserId;
+        name      = player.User.Name;
     }
 
     Json::Value@ ToJson() {
         Json::Value@ ret = Json::Object();
 
+        ret["accountId"]    = accountId;
         ret["division"]     = division.ToJson();
         ret["hasPenalty"]   = hasPenalty;
         ret["immunityDays"] = immunityDays;
         ret["matchPb"]      = matchPb;
         ret["mvp"]          = mvp;
+        ret["name"]         = name;
         ret["pb"]           = pb;
         ret["pbTimestamp"]  = pbTimestamp;
         ret["penalty"]      = penalty;
-        ret["points"]       = points;
         ret["progression"]  = progression;
         ret["rank"]         = rank;
+        ret["score"]        = score;
         ret["self"]         = self;
+        ret["team"]         = team;
 
         return ret;
     }
@@ -48,8 +95,6 @@ class Player {
 void GetMyStatusAsync() {
     const string funcName = "GetMyStatusAsync";
 
-    Json::Value@ status = Http::Nadeo::GetPlayerStatusAsync();
-
     if (State::me is null) {
         @State::me = Player();
 
@@ -57,12 +102,13 @@ void GetMyStatusAsync() {
         State::me.self = true;
     }
 
+    Json::Value@ status = Http::Nadeo::GetPlayerStatusAsync();
+
     if (true
         and status.HasKey("currentProgression")
         and status["currentProgression"].GetType() == Json::Type::Number
     ) {
         State::me.progression = uint(status["currentProgression"]);
-        State::me.GetDivision();
     }
 
     if (status.HasKey("inactivity")) {

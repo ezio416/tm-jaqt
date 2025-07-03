@@ -44,6 +44,23 @@ void RenderTabDebug() {
         UI::EndTabItem();
     }
 
+    if (UI::BeginTabItem(Icons::Users + " Players")) {
+        for (uint i = 0; i < State::playersArr.Length; i++) {
+            if (i > 0) {
+                UI::Separator();
+            }
+
+            // UI::TextWrapped(Json::Write(State::playersArr[i].ToJson(), true));
+            UI::Text("name: "        + State::playersArr[i].name);
+            UI::Text("progression: " + State::playersArr[i].progression);
+            UI::Text("div name: "    + State::playersArr[i].division.name);
+            UI::Text("team: "        + State::playersArr[i].team);
+            UI::Text("score: "       + State::playersArr[i].score);
+        }
+
+        UI::EndTabItem();
+    }
+
     if (UI::BeginTabItem(Icons::ListUl + " Divisions")) {
         for (uint i = 0; i < divisions.Length; i++) {
             divisions[i].RenderIcon(vec2(32.0f), true);
@@ -82,9 +99,12 @@ void RenderTabRanked() {
     UI::EndDisabled();
 
     UI::SameLine();
-    UI::BeginDisabled(true
-        and State::status != State::Status::Queueing
-        and State::status != State::Status::Queued
+    UI::BeginDisabled(false
+        or State::cancel
+        or (true
+            and State::status != State::Status::Queueing
+            and State::status != State::Status::Queued
+        )
     );
     if (UI::Button(Icons::Times + " Cancel")) {
         startnew(CancelQueueAsync);

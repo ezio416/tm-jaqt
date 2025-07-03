@@ -84,6 +84,31 @@ namespace Http {
             return null;
         }
 
+        Json::Value@ GetMatchParticipantsAsync(const string&in liveId) {
+            const string funcName = "Http::Nadeo::GetMatchParticipantsAsync";
+
+            if (liveId.Length == 0) {
+                Log::Warning(funcName, "liveId blank");
+                return null;
+            }
+
+            const string endpoint = "/matches/" + liveId + "/participants";
+            Json::Value@ response = GetMeetAsync(endpoint);
+
+            Log::Debug(funcName, endpoint + " | " + Json::Write(response));
+
+            if (response !is null) {
+                Log::ResponseToFile(funcName, response);
+
+                if (response.GetType() == Json::Type::Array) {
+                    return response;
+                }
+            }
+
+            Log::Error(funcName, "bad response");
+            return null;
+        }
+
         Json::Value@ GetMeetAsync(const string&in endpoint) {
             const string funcName = "Http::Nadeo::GetMeetAsync";
 
@@ -183,5 +208,9 @@ namespace Http {
             }
             lastRequest = now;
         }
+    }
+
+    namespace Tmio {
+        ;
     }
 }
