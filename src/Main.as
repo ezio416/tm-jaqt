@@ -1,12 +1,34 @@
 // c 2025-07-02
-// m 2025-07-02
+// m 2025-07-03
 
 const string  pluginColor = "\\$FAF";
 const string  pluginIcon  = Icons::Gamepad;
 Meta::Plugin@ pluginMeta  = Meta::ExecutingPlugin();
 const string  pluginTitle = pluginColor + pluginIcon + "\\$G " + pluginMeta.Name;
 
+bool        cancel    = false;
 Division@[] divisions = { Division() };
+Match@      match;
+string      matchID;
+Player@     me;
+QueueStatus status    = QueueStatus::None;
+
+void OnDestroyed() {
+    switch (status) {
+        case QueueStatus::Queueing:
+        case QueueStatus::Queued:
+            warn("OnDestroyed | cancelling queue");
+
+            NadeoServices::Post(
+                API::Nadeo::audienceLive,
+                NadeoServices::BaseURLMeet() + "/api/matchmaking/ranked-2v2/cancel"
+            ).Start();
+    }
+}
+
+void OnDisabled() {
+    OnDestroyed();
+}
 
 void Main() {
     API::Nadeo::InitAsync();
@@ -15,7 +37,7 @@ void Main() {
         return;
     }
 
-    print(Json::Write(API::Nadeo::GetLeaderboardPlayersAsync({ "594be80b-62f3-4705-932b-e743e97882cf" })));
+    GetMyStatusAsync();
 }
 
 void Render() {
@@ -32,7 +54,36 @@ void Render() {
             divisions[i].RenderIcon(vec2(32.0f), true);
             UI::SameLine();
             UI::AlignTextToFramePadding();
-            UI::Text(tostring(divisions[i]));
+            UI::TextWrapped(tostring(divisions[i]));
+        }
+
+        UI::Separator();
+
+        if (me !is null) {
+            UI::TextWrapped(Json::Write(me.ToJson(), true));
+        }
+
+        UI::Separator();
+
+        UI::Text("status: " + tostring(status));
+
+        UI::BeginDisabled(status != QueueStatus::None);
+        if (UI::Button("start queue")) {
+            startnew(QueueAsync);
+        }
+        UI::EndDisabled();
+
+        // UI::BeginDisabled(true
+        //     and status != QueueStatus::Queueing
+        //     and status != QueueStatus::Queued
+        // );
+        if (UI::Button("cancel")) {
+            startnew(QueueCancelAsync);
+        }
+        // UI::EndDisabled();
+
+        if (UI::Button("get status")) {
+            startnew(GetMyStatusAsync);
         }
     }
     UI::End();

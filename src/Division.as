@@ -18,6 +18,23 @@ const string[] divisionNames = {
     "Trackmaster"
 };
 
+const string[] divisionShortNames = {
+    "--",
+    "B1",
+    "B2",
+    "B3",
+    "S1",
+    "S2",
+    "S3",
+    "G1",
+    "G2",
+    "G3",
+    "M1",
+    "M2",
+    "M3",
+    "TM"
+};
+
 enum DivisionRuleType {
     Unknown,
     MinimumPoints,
@@ -32,6 +49,7 @@ class Division {
     uint             minimumRank   = 0;
     string           name          = divisionNames[0];
     uint             position      = 0;
+    string           shortName     = divisionShortNames[0];
     DivisionRuleType type          = DivisionRuleType::Unknown;
 
     Division() { }
@@ -50,6 +68,7 @@ class Division {
             and position <= 13
         ) {
             name = divisionNames[position];
+            shortName = divisionShortNames[position];
         } else {
             warn("Division | unknown position: " + position);
         }
@@ -146,37 +165,23 @@ class Division {
         }
     }
 
-    string ToString() {
-        string ret = "division " + position + " (" + name + "): ";
+    Json::Value@ ToJson() {
+        Json::Value@ ret = Json::Object();
 
-        switch (type) {
-            case DivisionRuleType::MinimumPoints:
-                ret += "min points: " + minimumPoints;
-                break;
-
-            case DivisionRuleType::MinimumRankAndPoints:
-                ret += "min rank: " + minimumRank + ", min points: " + minimumPoints;
-                break;
-
-            case DivisionRuleType::PointsRange:
-                ret += "points range: " + minimumPoints + "-" + maximumPoints;
-                break;
-
-            default:
-                ret += "unknown";
-        }
+        ret["maximumPoints"] = maximumPoints;
+        ret["minimumPoints"] = minimumPoints;
+        ret["minimumRank"]   = minimumRank;
+        ret["name"]          = name;
+        ret["position"]      = position;
+        ret["shortName"]      = shortName;
+        ret["type"]          = int(type);
 
         return ret;
     }
-}
 
-Division@ GetDivision(const uint points, const uint rank = 0) {
-    for (uint i = 1; i < divisions.Length; i++) {
-        if (divisions[i].In(points, rank)) {
-            return divisions[i];
-        }
+    string ToString() {
+        return Json::Write(ToJson());
     }
-    return divisions[0];
 }
 
 bool GetDivisionsAsync() {
@@ -199,4 +204,13 @@ bool GetDivisionsAsync() {
         error("GetDivisionsAsync | " + getExceptionInfo());
         return false;
     }
+}
+
+Division@ GetPlayerDivision(const uint progression, const uint rank = 0) {
+    for (int i = divisions.Length - 1; i > 0; i--) {
+        if (divisions[i].In(progression, rank)) {
+            return divisions[i];
+        }
+    }
+    return divisions[0];
 }
