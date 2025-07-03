@@ -181,7 +181,7 @@ Division@ GetDivision(const uint points, const uint rank = 0) {
 
 bool GetDivisionsAsync() {
     try {
-        Json::Value@ response = API::Nadeo::GetMeetAsync("matchmaking/ranked-2v2/division/display-rules")["divisions"];
+        Json::Value@ response = API::Nadeo::GetDivisionDisplayRulesAsync()["divisions"];
 
         divisions = { Division() };
         for (uint i = 0; i < response.Length; i++) {
@@ -196,7 +196,7 @@ bool GetDivisionsAsync() {
         return true;
 
     } catch {
-        error("Divisions::GetAsync | " + getExceptionInfo());
+        error("GetDivisionsAsync | " + getExceptionInfo());
         return false;
     }
 }

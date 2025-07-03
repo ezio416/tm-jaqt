@@ -7,6 +7,14 @@ namespace API {
         uint64       lastRequest  = 0;
         const uint64 waitTime     = 500;
 
+        Json::Value@ GetDivisionDisplayRulesAsync() {
+            return GetMeetAsync("matchmaking/ranked-2v2/division/display-rules");
+        }
+
+        Json::Value@ GetLeaderboardPlayersAsync(const string[]@ accountIDs) {
+            return GetMeetAsync("matchmaking/ranked-2v2/leaderboard/players?players[]=" + string::Join(accountIDs, "&players[]="));
+        }
+
         Json::Value@ GetMeetAsync(const string&in endpoint) {
             Net::HttpRequest@ req = NadeoServices::Get(
                 audienceLive,

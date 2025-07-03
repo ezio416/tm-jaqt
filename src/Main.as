@@ -15,7 +15,7 @@ void Main() {
         return;
     }
 
-    print(Json::Write(API::Nadeo::GetMeetAsync("matchmaking/ranked-2v2/leaderboard/players?players[]=84505c99-31f7-461e-8e53-9214fe0a68f0")));
+    print(Json::Write(API::Nadeo::GetLeaderboardPlayersAsync({ "594be80b-62f3-4705-932b-e743e97882cf" })));
 }
 
 void Render() {
@@ -27,7 +27,7 @@ void Render() {
         return;
     }
 
-    if (UI::Begin(pluginTitle, S_Enabled, UI::WindowFlags::None)) {
+    if (UI::Begin(pluginTitle + "###main-" + pluginMeta.ID, S_Enabled, UI::WindowFlags::None)) {
         for (uint i = 0; i < divisions.Length; i++) {
             divisions[i].RenderIcon(vec2(32.0f), true);
             UI::SameLine();
