@@ -1,14 +1,17 @@
 // c 2025-07-03
-// m 2025-07-03
+// m 2025-07-23
 
 namespace State {
-    bool        cancel     = false;
-    Match@      match;
-    Player@     me;
-    dictionary@ players    = dictionary();
-    Player@[]   playersArr;
-    uint64      queueStart = 0;
-    Status      status     = Status::NotQueued;
+    bool         cancel     = false;
+    string       mapName;
+    UI::Texture@ mapThumbnail;
+    string       mapThumbnailUrl;
+    Match@       match;
+    Player@      me;
+    dictionary@  players    = dictionary();
+    Player@[]    playersArr;
+    uint64       queueStart = 0;
+    Status       status     = Status::NotQueued;
 
     enum Status {
         NotQueued,

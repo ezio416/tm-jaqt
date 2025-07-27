@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-07-03
+// m 2025-07-26
 
 class Player {
     string     accountId;
@@ -11,6 +11,7 @@ class Player {
     uint       pb           = 0;
     uint64     pbTimestamp  = 0;
     int        penalty      = 0;
+    CSmPlayer@ player;
     uint       progression  = 0;
     uint       rank         = 0;
     uint       score        = 0;
@@ -22,38 +23,52 @@ class Player {
     }
 
     uint get_score() {
-        auto Playground = cast<CSmArenaClient>(GetApp().CurrentPlayground);
-        if (Playground !is null) {
-            for (uint i = 0; i < Playground.Players.Length; i++) {
-                auto player = cast<CSmPlayer>(Playground.Players[i]);
-                if (true
-                    and player !is null
-                    and player.User !is null
-                    and player.User.WebServicesUserId == accountId
-                    and player.Score !is null
-                ) {
-                    return player.Score.Points;
-                }
-            }
+        // auto Playground = cast<CSmArenaClient>(GetApp().CurrentPlayground);
+        // if (Playground !is null) {
+        //     for (uint i = 0; i < Playground.Players.Length; i++) {
+        //         auto player = cast<CSmPlayer>(Playground.Players[i]);
+        //         if (true
+        //             and player !is null
+        //             and player.User !is null
+        //             and player.User.WebServicesUserId == accountId
+        //             and player.Score !is null
+        //         ) {
+        //             return player.Score.Points;
+        //         }
+        //     }
+        // }
+
+        if (true
+            and player !is null
+            and player.Score !is null
+        ) {
+            return player.Score.Points;
         }
 
         return 0;
     }
 
     int get_team() {
-        auto Playground = cast<CSmArenaClient>(GetApp().CurrentPlayground);
-        if (Playground !is null) {
-            for (uint i = 0; i < Playground.Players.Length; i++) {
-                auto player = cast<CSmPlayer>(Playground.Players[i]);
-                if (true
-                    and player !is null
-                    and player.User !is null
-                    and player.User.WebServicesUserId == accountId
-                    and player.Score !is null
-                ) {
-                    return player.Score.TeamNum;
-                }
-            }
+        // auto Playground = cast<CSmArenaClient>(GetApp().CurrentPlayground);
+        // if (Playground !is null) {
+        //     for (uint i = 0; i < Playground.Players.Length; i++) {
+        //         auto player = cast<CSmPlayer>(Playground.Players[i]);
+        //         if (true
+        //             and player !is null
+        //             and player.User !is null
+        //             and player.User.WebServicesUserId == accountId
+        //             and player.Score !is null
+        //         ) {
+        //             return player.Score.TeamNum;
+        //         }
+        //     }
+        // }
+
+        if (true
+            and player !is null
+            and player.Score !is null
+        ) {
+            return player.Score.TeamNum;
         }
 
         return -1;
@@ -61,8 +76,10 @@ class Player {
 
     Player() { }
     Player(CSmPlayer@ player) {
-        accountId = player.User.WebServicesUserId;
-        name      = player.User.Name;
+        accountId    = player.User.WebServicesUserId;
+        name         = player.User.Name;
+        @this.player = player;
+        this.player.MwAddRef();
     }
 
     Json::Value@ ToJson() {
@@ -149,5 +166,43 @@ void GetMyStatusAsync() {
         State::me.rank = uint(leaderboard["results"][0]["rank"]);
     } else {
         Log::Warning(funcName, "error getting my rank");
+    }
+}
+
+void SetMVP() {
+    uint bestTime = uint(-1);
+    Player@ mvp;
+    Player@ player;
+
+    const MLFeed::HookRaceStatsEventsBase_V4@ raceData = MLFeed::GetRaceData_V4();
+
+    for (uint i = 0; i < State::playersArr.Length; i++) {
+        @player = State::playersArr[i];
+        player.mvp = false;
+
+        if (player.score == 0) {
+            continue;
+        }
+
+        if (false
+            or mvp is null
+            or player.score > mvp.score
+        ) {
+            @mvp = player;
+            bestTime = raceData.GetPlayer_V4(player.name).BestTime;
+            continue;
+        }
+
+        if (player.score == mvp.score) {
+            const uint newBest = raceData.GetPlayer_V4(player.name).BestTime;
+            if (newBest < bestTime) {
+                @mvp = player;
+                bestTime = newBest;
+            }
+        }
+    }
+
+    if (mvp !is null) {
+        mvp.mvp = true;
     }
 }

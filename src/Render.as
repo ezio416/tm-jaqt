@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-07-03
+// m 2025-07-26
 
 void RenderMainTabs() {
     UI::BeginTabBar("##tabbar-main");
@@ -82,8 +82,16 @@ void RenderTabRanked() {
         return;
     }
 
+    const float scale = UI::GetScale();
+
+    if (State::mapThumbnail !is null) {
+        const vec2 pre = UI::GetCursorPos();
+        UI::ImageWithBg(State::mapThumbnail, UI::GetContentRegionAvail(), tint_col: vec4(vec3(1.0f), 0.05f));
+        UI::SetCursorPos(pre);
+    }
+
     if (State::me !is null) {
-        State::me.division.RenderIcon(vec2(48.0f * UI::GetScale()), true);
+        State::me.division.RenderIcon(vec2(scale * 48.0f), true);
 
         UI::SameLine();
         UI::BeginGroup();
@@ -110,6 +118,38 @@ void RenderTabRanked() {
         startnew(CancelQueueAsync);
     }
     UI::EndDisabled();
+
+    if (State::mapName.Length > 0) {
+        UI::Text(State::mapName);
+    }
+
+    if (State::status == State::Status::InMatch) {
+        Player@ player;
+
+        SetMVP();
+
+        UI::SeparatorText("Blue");
+        for (uint i = 0; i < State::playersArr.Length; i++) {
+            @player = State::playersArr[i];
+            if (player.team == 1) {
+                player.division.RenderIcon(scale * 24.0f, true);
+                UI::SameLine();
+                UI::AlignTextToFramePadding();
+                UI::Text(player.name + " | " + player.score);
+            }
+        }
+
+        UI::SeparatorText("Red");
+        for (uint i = 0; i < State::playersArr.Length; i++) {
+            @player = State::playersArr[i];
+            if (player.team == 2) {
+                player.division.RenderIcon(scale * 24.0f, true);
+                UI::SameLine();
+                UI::AlignTextToFramePadding();
+                UI::Text(player.name + " | " + player.score + (player.mvp ? Icons::Star : ""));
+            }
+        }
+    }
 
     UI::EndTabItem();
 }

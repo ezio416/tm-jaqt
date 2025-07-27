@@ -47,6 +47,61 @@ void StartQueueAsync() {
                 while (true) {
                     @State::match = Match(Http::Nadeo::GetMatchInfoAsync(liveId));
 
+                    if (true
+                        and State::mapName.Length == 0
+                        and State::match.mapUid.Length > 0
+                    ) {
+                        Json::Value@ mapInfo = Http::Nadeo::GetMapInfo(State::match.mapUid);
+                        if (mapInfo !is null) {
+                            if (true
+                                and mapInfo.HasKey("name")
+                                and mapInfo["name"].GetType() == Json::Type::String
+                            ) {
+                                State::mapName = Text::OpenplanetFormatCodes(string(mapInfo["name"]));
+                            }
+
+                            bool loadedThumbnail = false;
+
+                            const string thumbnailFile = IO::FromStorageFolder(State::match.mapUid + ".jpg");
+                            if (IO::FileExists(thumbnailFile)) {
+                                try {
+                                    IO::File file(thumbnailFile, IO::FileMode::Read);
+                                    @State::mapThumbnail = UI::LoadTexture(file.Read(file.Size()));
+                                    loadedThumbnail = true;
+                                } catch {
+                                    Log::Error(funcName, "error loading map thumbnail from file: " + getExceptionInfo());
+                                }
+                            }
+
+                            if (!loadedThumbnail) {
+                                if (true
+                                    and mapInfo.HasKey("thumbnailUrl")
+                                    and mapInfo["thumbnailUrl"].GetType() == Json::Type::String
+                                ) {
+                                    State::mapThumbnailUrl = string(mapInfo["thumbnailUrl"]);
+                                    if (State::mapThumbnailUrl.Length > 0) {
+                                        Net::HttpRequest@ thumbnail = Net::HttpGet(State::mapThumbnailUrl);
+                                        while (!thumbnail.Finished()) {
+                                            yield();
+                                        }
+
+                                        try {
+                                            @State::mapThumbnail = UI::LoadTexture(thumbnail.Buffer());
+                                        } catch {
+                                            Log::Error(funcName, "error loading map thumbnail from buffer: " + getExceptionInfo());
+                                        }
+
+                                        try {
+                                            thumbnail.SaveToFile(thumbnailFile);
+                                        } catch {
+                                            Log::Warning(funcName, "error saving map thumbnail to file: " + getExceptionInfo());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if (State::match.JoinAsync()) {
                         break;
                     }
@@ -110,9 +165,9 @@ void StartQueueAsync() {
                             }
                         }
                     } else {
+                        playerCount       = 0;
                         State::players.DeleteAll();
                         State::playersArr = {};
-                        playerCount = 0;
                     }
 
                     @State::match = Match(Http::Nadeo::GetMatchInfoAsync(liveId));
@@ -120,7 +175,13 @@ void StartQueueAsync() {
                     if (State::match.status == MatchStatus::COMPLETED) {
                         Log::Info(funcName, "match completed");
                         State::SetStatus(State::Status::NotQueued);
+
+                        State::mapName         = "";
+                        @State::mapThumbnail   = null;
+                        State::mapThumbnailUrl = "";
+
                         startnew(GetMyStatusAsync);
+
                         break;
                     }
 

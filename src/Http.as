@@ -59,6 +59,48 @@ namespace Http {
             return null;
         }
 
+        Json::Value@ GetLiveAsync(const string&in endpoint) {
+            const string funcName = "Http::Nadeo::GetLiveAsync";
+
+            Net::HttpRequest@ req = NadeoServices::Get(
+                audienceLive,
+                NadeoServices::BaseURLLive() + "/api/" + (endpoint.StartsWith("/") ? endpoint.SubStr(1) : endpoint)
+            );
+            StartRequestAsync(req);
+
+            try {
+                return req.Json();
+            } catch {
+                Log::Error(funcName, endpoint + " | " + getExceptionInfo());
+                return null;
+            }
+        }
+
+        Json::Value@ GetMapInfo(const string&in mapUid) {
+            const string funcName = "Http::Nadeo::GetMapInfo";
+
+            if (mapUid.Length == 0) {
+                Log::Warning(funcName, "mapUid blank");
+                return null;
+            }
+
+            const string endpoint = "/token/map/" + mapUid;
+            Json::Value@ response = GetLiveAsync(endpoint);
+
+            Log::Debug(funcName, endpoint + " | " + Json::Write(response));
+
+            if (response !is null) {
+                Log::ResponseToFile(funcName, response);
+
+                if (response.GetType() == Json::Type::Object) {
+                    return response;
+                }
+            }
+
+            Log::Error(funcName, "bad response");
+            return null;
+        }
+
         Json::Value@ GetMatchInfoAsync(const string&in liveId) {
             const string funcName = "Http::Nadeo::GetMatchInfoAsync";
 
