@@ -121,6 +121,7 @@ void RenderTabRanked() {
         State::me.division.RenderIcon(vec2(scale * 48.0f), true);
 
         UI::SameLine();
+        UI::AlignTextToFramePadding();
         UI::BeginGroup();
         UI::Text("Points: " + State::me.progression);
         string rank = "Rank: " + State::me.rank;
