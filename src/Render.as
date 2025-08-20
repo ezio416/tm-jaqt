@@ -37,48 +37,75 @@ void RenderTabDebug() {
     UI::BeginTabBar("##tabs-debug");
 
     if (UI::BeginTabItem(Icons::User + " Me")) {
-        if (State::me !is null) {
-            UI::TextWrapped(Json::Write(State::me.ToJson(), true));
+        if (UI::BeginChild("##child-debug-me")) {
+            if (State::me !is null) {
+                UI::TextWrapped(Json::Write(State::me.ToJson(), true));
+            }
         }
 
+        UI::EndChild();
         UI::EndTabItem();
     }
 
     if (UI::BeginTabItem(Icons::Users + " Players")) {
-        for (uint i = 0; i < State::playersArr.Length; i++) {
-            if (i > 0) {
-                UI::Separator();
-            }
+        if (UI::BeginChild("##child-debug-players")) {
+            for (uint i = 0; i < State::playersArr.Length; i++) {
+                if (i > 0) {
+                    UI::Separator();
+                }
 
-            // UI::TextWrapped(Json::Write(State::playersArr[i].ToJson(), true));
-            UI::Text("name: "        + State::playersArr[i].name);
-            UI::Text("progression: " + State::playersArr[i].progression);
-            UI::Text("div name: "    + State::playersArr[i].division.name);
-            UI::Text("team: "        + State::playersArr[i].team);
-            UI::Text("score: "       + State::playersArr[i].score);
+                // UI::TextWrapped(Json::Write(State::playersArr[i].ToJson(), true));
+                UI::Text("name: "        + State::playersArr[i].name);
+                UI::Text("progression: " + State::playersArr[i].progression);
+                UI::Text("div name: "    + State::playersArr[i].division.name);
+                UI::Text("team: "        + State::playersArr[i].team);
+                UI::Text("score: "       + State::playersArr[i].score);
+            }
         }
 
+        UI::EndChild();
         UI::EndTabItem();
     }
 
     if (UI::BeginTabItem(Icons::ListUl + " Divisions")) {
-        for (uint i = 0; i < divisions.Length; i++) {
-            divisions[i].RenderIcon(vec2(32.0f), true);
-            UI::SameLine();
-            UI::AlignTextToFramePadding();
-            UI::TextWrapped(tostring(divisions[i]));
+        if (UI::BeginChild("##child-debug-divs")) {
+            for (uint i = 0; i < divisions.Length; i++) {
+                divisions[i].RenderIcon(vec2(32.0f), true);
+                UI::SameLine();
+                UI::AlignTextToFramePadding();
+                UI::TextWrapped(tostring(divisions[i]));
+            }
         }
 
+        UI::EndChild();
+        UI::EndTabItem();
+    }
+
+    if (UI::BeginTabItem(Icons::QuestionCircle + " Other")) {
+        if (UI::BeginChild("##child-debug-other")) {
+            UI::Text("active players: " + State::activePlayers);
+            UI::Text("cancel: " + State::cancel);
+            UI::Text("map name: " + State::mapName);
+            UI::Text("map thumbnail URL: " + State::mapThumbnailUrl);
+            UI::Text("queueStart: " + State::queueStart);
+            UI::Text("status: " + tostring(State::status));
+        }
+
+        UI::EndChild();
         UI::EndTabItem();
     }
 
     UI::EndTabBar();
-
     UI::EndTabItem();
 }
 
 void RenderTabRanked() {
     if (!UI::BeginTabItem(Icons::Trophy + " Ranked")) {
+        return;
+    }
+
+    if (!UI::BeginChild("##child-ranked")) {
+        UI::EndChild();
         return;
     }
 
@@ -96,7 +123,11 @@ void RenderTabRanked() {
         UI::SameLine();
         UI::BeginGroup();
         UI::Text("Points: " + State::me.progression);
-        UI::Text("Rank: " + State::me.rank);
+        string rank = "Rank: " + State::me.rank;
+        if (State::activePlayers > 0) {
+            rank += " / " + State::activePlayers + Text::Format(" (top %.1f%%)", float(State::me.rank) / State::activePlayers * 100.0f);
+        }
+        UI::Text(rank);
         UI::EndGroup();
     }
 
@@ -149,6 +180,7 @@ void RenderTabRanked() {
         }
     }
 
+    UI::EndChild();
     UI::EndTabItem();
 }
 
@@ -157,7 +189,10 @@ void RenderTabSettings() {
         return;
     }
 
-    ;
+    if (UI::BeginChild("##child-settings")) {
+        ;
+    }
 
+    UI::EndChild();
     UI::EndTabItem();
 }

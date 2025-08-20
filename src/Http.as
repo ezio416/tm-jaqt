@@ -253,6 +253,32 @@ namespace Http {
     }
 
     namespace Tmio {
-        ;
+        void GetActivePlayersAsync() {
+            const string funcName = "Http::Tmio::GetActivePlayersAsync";
+
+            Net::HttpRequest@ req = Net::HttpGet("https://trackmania.io/api/player/" + GetApp().LocalPlayerInfo.WebServicesUserId);
+            while (!req.Finished()) {
+                yield();
+            }
+
+            try {
+                Json::Value@ response = req.Json();
+                Log::ResponseToFile(funcName, response);
+
+                Json::Value@ mm = response["matchmaking"];
+                for (uint i = 0; i < mm.Length; i++) {
+                    if (string(mm[i]["info"]["typename"]) == "2v2") {
+                        State::activePlayers = uint(mm[i]["totalactive"]);
+                        Log::Info(funcName, "active players: " + State::activePlayers);
+                        return;
+                    }
+                }
+
+                Log::Warning(funcName, "didn't find active players");
+
+            } catch {
+                Log::Error(funcName, getExceptionInfo());
+            }
+        }
     }
 }

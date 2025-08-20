@@ -2,7 +2,8 @@
 // m 2025-08-20
 
 namespace State {
-    bool         cancel     = false;
+    uint         activePlayers = 0;
+    bool         cancel        = false;
     string       mapName;
     UI::Texture@ mapThumbnail;
     string       mapThumbnailUrl;
@@ -10,8 +11,8 @@ namespace State {
     Player@      me;
     dictionary   players;
     Player@[]    playersArr;
-    uint64       queueStart = 0;
-    Status       status     = Status::NotQueued;
+    uint64       queueStart    = 0;
+    Status       status        = Status::NotQueued;
 
     enum Status {
         NotQueued,

@@ -20,6 +20,7 @@ void Main() {
     }
 
     GetMyStatusAsync();
+    Http::Tmio::GetActivePlayersAsync();
 }
 
 void OnDestroyed() {
