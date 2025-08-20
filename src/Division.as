@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-07-03
+// m 2025-08-20
 
 const string[] divisionNames = {
     "Unknown",
@@ -173,7 +173,7 @@ class Division {
         ret["minimumRank"]   = minimumRank;
         ret["name"]          = name;
         ret["position"]      = position;
-        ret["shortName"]      = shortName;
+        ret["shortName"]     = shortName;
         ret["type"]          = int(type);
 
         return ret;
@@ -201,7 +201,7 @@ bool GetDivisionsAsync() {
         return true;
 
     } catch {
-        error("GetDivisionsAsync | " + getExceptionInfo());
+        Log::Error("GetDivisionsAsync", getExceptionInfo());
         return false;
     }
 }

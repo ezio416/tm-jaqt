@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-07-26
+// m 2025-08-20
 
 class Player {
     string     accountId;
@@ -23,21 +23,6 @@ class Player {
     }
 
     uint get_score() {
-        // auto Playground = cast<CSmArenaClient>(GetApp().CurrentPlayground);
-        // if (Playground !is null) {
-        //     for (uint i = 0; i < Playground.Players.Length; i++) {
-        //         auto player = cast<CSmPlayer>(Playground.Players[i]);
-        //         if (true
-        //             and player !is null
-        //             and player.User !is null
-        //             and player.User.WebServicesUserId == accountId
-        //             and player.Score !is null
-        //         ) {
-        //             return player.Score.Points;
-        //         }
-        //     }
-        // }
-
         if (true
             and player !is null
             and player.Score !is null
@@ -49,21 +34,6 @@ class Player {
     }
 
     int get_team() {
-        // auto Playground = cast<CSmArenaClient>(GetApp().CurrentPlayground);
-        // if (Playground !is null) {
-        //     for (uint i = 0; i < Playground.Players.Length; i++) {
-        //         auto player = cast<CSmPlayer>(Playground.Players[i]);
-        //         if (true
-        //             and player !is null
-        //             and player.User !is null
-        //             and player.User.WebServicesUserId == accountId
-        //             and player.Score !is null
-        //         ) {
-        //             return player.Score.TeamNum;
-        //         }
-        //     }
-        // }
-
         if (true
             and player !is null
             and player.Score !is null

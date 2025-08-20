@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-07-03
+// m 2025-08-20
 
 const string  pluginColor = "\\$F6F";
 const string  pluginIcon  = Icons::Gamepad;
@@ -8,27 +8,6 @@ const string  pluginTitle = pluginColor + pluginIcon + "\\$G " + pluginMeta.Name
 
 Division@[]    divisions = { Division() };
 Audio::Sample@ sound;
-
-void OnDestroyed() {
-    switch (State::status) {
-        case State::Status::Queueing:
-        case State::Status::Queued:
-            Log::Warning("OnDestroyed", "canceling queue");
-
-            NadeoServices::Post(
-                Http::Nadeo::audienceLive,
-                NadeoServices::BaseURLMeet() + "/api/matchmaking/ranked-2v2/cancel"
-            ).Start();  // Openplanet throws a warning but it's fine
-    }
-}
-
-void OnDisabled() {
-    OnDestroyed();
-}
-
-void OnSettingsChanged() {
-    S_Volume = Math::Clamp(S_Volume, 0.0f, 100.0f);
-}
 
 void Main() {
     @sound = Audio::LoadSample("assets/MatchFound.wav");
@@ -43,11 +22,38 @@ void Main() {
     GetMyStatusAsync();
 }
 
+void OnDestroyed() {
+    OnDisabled();
+}
+
+void OnDisabled() {
+    switch (State::status) {
+        case State::Status::Queueing:
+        case State::Status::Queued:
+            Log::Warning("OnDisabled", "canceling queue");
+
+            NadeoServices::Post(
+                Http::Nadeo::audienceLive,
+                NadeoServices::BaseURLMeet() + "/api/matchmaking/ranked-2v2/cancel"
+            ).Start();  // Openplanet throws a warning but it's fine
+    }
+}
+
+void OnSettingsChanged() {
+    S_Volume = Math::Clamp(S_Volume, 0.0f, 100.0f);
+}
+
 void Render() {
     if (false
         or !S_Enabled
-        or (S_HideWithGame and !UI::IsGameUIVisible())
-        or (S_HideWithOP and !UI::IsOverlayShown())
+        or (true
+            and S_HideWithGame
+            and !UI::IsGameUIVisible()
+        )
+        or (true
+            and S_HideWithOP
+            and !UI::IsOverlayShown()
+        )
     ) {
         return;
     }

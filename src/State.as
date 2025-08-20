@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-07-23
+// m 2025-08-20
 
 namespace State {
     bool         cancel     = false;
@@ -8,7 +8,7 @@ namespace State {
     string       mapThumbnailUrl;
     Match@       match;
     Player@      me;
-    dictionary@  players    = dictionary();
+    dictionary   players;
     Player@[]    playersArr;
     uint64       queueStart = 0;
     Status       status     = Status::NotQueued;

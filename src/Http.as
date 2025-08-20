@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-07-03
+// m 2025-08-20
 
 namespace Http {
     namespace Nadeo {
@@ -244,11 +244,11 @@ namespace Http {
         }
 
         void WaitAsync() {
-            uint64 now;
-            while ((now = Time::Now) - lastRequest < waitTime) {
-                yield();
+            const uint64 now = Time::Now;
+            if (now - lastRequest < waitTime) {
+                sleep(lastRequest + waitTime - now);
             }
-            lastRequest = now;
+            lastRequest = Time::Now;
         }
     }
 
