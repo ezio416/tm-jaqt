@@ -1,9 +1,9 @@
 ![Signed](https://img.shields.io/badge/Signed-No-FF3333)
 ![Game Trackmania](https://img.shields.io/badge/Game-Trackmania-blue)
 
-# PluginTemplate
+# Mini Ranked Tool
 
-A template for writing plugins more easily.
+Access matchmaking simply.
 
 <!-- ![Signed](https://img.shields.io/badge/Signed-Yes-00AA00) -->
 <!-- ![Signed](https://img.shields.io/badge/Signed-School_Mode-CC1199) -->
