@@ -3,6 +3,7 @@ name = "Simple Ranked"
 author = "Ezio"
 category = "Matchmaking"
 version = "0.1.0"
+siteid = 758
 
 [script]
 dependencies = [ "NadeoServices" ]
