@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-07-26
+// m 2025-08-20
 
 void RenderMainTabs() {
     UI::BeginTabBar("##tabbar-main");
@@ -126,8 +126,6 @@ void RenderTabRanked() {
     if (State::status == State::Status::InMatch) {
         Player@ player;
 
-        SetMVP();
-
         UI::SeparatorText("Blue");
         for (uint i = 0; i < State::playersArr.Length; i++) {
             @player = State::playersArr[i];
@@ -146,7 +144,7 @@ void RenderTabRanked() {
                 player.division.RenderIcon(scale * 24.0f, true);
                 UI::SameLine();
                 UI::AlignTextToFramePadding();
-                UI::Text(player.name + " | " + player.score + (player.mvp ? Icons::Star : ""));
+                UI::Text(player.name + " | " + player.score);
             }
         }
     }

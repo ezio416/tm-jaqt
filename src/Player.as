@@ -6,7 +6,6 @@ class Player {
     bool       hasPenalty   = false;
     uint       immunityDays = 0;
     uint       matchPb      = 0;
-    bool       mvp          = false;
     string     name;
     uint       pb           = 0;
     uint64     pbTimestamp  = 0;
@@ -60,7 +59,6 @@ class Player {
         ret["hasPenalty"]   = hasPenalty;
         ret["immunityDays"] = immunityDays;
         ret["matchPb"]      = matchPb;
-        ret["mvp"]          = mvp;
         ret["name"]         = name;
         ret["pb"]           = pb;
         ret["pbTimestamp"]  = pbTimestamp;
@@ -136,43 +134,5 @@ void GetMyStatusAsync() {
         State::me.rank = uint(leaderboard["results"][0]["rank"]);
     } else {
         Log::Warning(funcName, "error getting my rank");
-    }
-}
-
-void SetMVP() {
-    uint bestTime = uint(-1);
-    Player@ mvp;
-    Player@ player;
-
-    const MLFeed::HookRaceStatsEventsBase_V4@ raceData = MLFeed::GetRaceData_V4();
-
-    for (uint i = 0; i < State::playersArr.Length; i++) {
-        @player = State::playersArr[i];
-        player.mvp = false;
-
-        if (player.score == 0) {
-            continue;
-        }
-
-        if (false
-            or mvp is null
-            or player.score > mvp.score
-        ) {
-            @mvp = player;
-            bestTime = raceData.GetPlayer_V4(player.name).BestTime;
-            continue;
-        }
-
-        if (player.score == mvp.score) {
-            const uint newBest = raceData.GetPlayer_V4(player.name).BestTime;
-            if (newBest < bestTime) {
-                @mvp = player;
-                bestTime = newBest;
-            }
-        }
-    }
-
-    if (mvp !is null) {
-        mvp.mvp = true;
     }
 }
