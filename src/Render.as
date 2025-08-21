@@ -191,7 +191,15 @@ void RenderTabSettings() {
     }
 
     if (UI::BeginChild("##child-settings")) {
-        ;
+        S_HideWithGame = UI::Checkbox("Show/hide with game UI", S_HideWithGame);
+        S_HideWithOP = UI::Checkbox("Show/hide with Openplanet UI", S_HideWithOP);
+        S_Debug = UI::Checkbox("Show debug tab", S_Debug);
+        S_RankColor = UI::Checkbox("Use current rank for UI color", S_RankColor);
+
+        S_Volume = UI::SliderFloat("Notification volume", S_Volume, 0.0f, 100.0f, flags: UI::SliderFlags::AlwaysClamp);
+        if (UI::Button(Icons::Play + " Test")) {
+            PlaySound();
+        }
     }
 
     UI::EndChild();

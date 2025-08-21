@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-07-03
+// m 2025-08-20
 
 [Setting category="General" name="Enabled"]
 bool S_Enabled = true;
@@ -9,6 +9,9 @@ bool S_HideWithGame = true;
 
 [Setting category="General" name="Show/hide with Openplanet UI"]
 bool S_HideWithOP = false;
+
+[Setting category="General" name="Use current rank for UI color"]
+bool S_RankColor = true;
 
 [Setting category="General" name="Log level"]
 Log::Level S_LogLevel = Log::Level::Info;

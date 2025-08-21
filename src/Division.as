@@ -1,6 +1,13 @@
 // c 2025-07-02
 // m 2025-08-20
 
+const vec4[] divisionColors = {
+    vec4(vec3(0.45f, 0.27f, 0.13f), 1.0f),
+    vec4(vec3(0.44f), 1.0f),
+    vec4(vec3(0.82f, 0.56f, 0.0f), 1.0f),
+    vec4(vec3(0.36f, 0.68f, 0.12f), 1.0f)
+};
+
 const string[] divisionNames = {
     "Unknown",
     "Bronze I",
@@ -43,6 +50,7 @@ enum DivisionRuleType {
 }
 
 class Division {
+    vec4             color         = divisionColors[0];
     UI::Texture@     icon;
     uint             maximumPoints = 0;
     uint             minimumPoints = 0;
@@ -69,6 +77,21 @@ class Division {
         ) {
             name = divisionNames[position];
             shortName = divisionShortNames[position];
+
+            switch (position) {
+                case 0: case 1: case 2: case 3:
+                    color = divisionColors[0];
+                    break;
+                case 4: case 5: case 6:
+                    color = divisionColors[1];
+                    break;
+                case 7: case 8: case 9:
+                    color = divisionColors[2];
+                    break;
+                default:
+                    color = divisionColors[3];
+            }
+
         } else {
             Log::Warning("Division", "unknown position: " + position);
         }
