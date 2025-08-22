@@ -3,7 +3,7 @@
 
 # Simple Ranked
 
-Solo queue 2v2.
+Solo queue 2v2. Might add party functionality in the future. Inspired by AFK Queue Tool.
 
 <!-- ![Signed](https://img.shields.io/badge/Signed-Yes-00AA00) -->
 <!-- ![Signed](https://img.shields.io/badge/Signed-School_Mode-CC1199) -->
