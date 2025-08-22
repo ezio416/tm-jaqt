@@ -106,7 +106,7 @@ void RenderMenuMain() {
             break;
     }
 
-    if (UI::BeginMenu(title)) {
+    if (UI::BeginMenu(title + "###menumain-" + pluginMeta.ID)) {
         if (S_RankColor) {
             UI::PushStyleColor(UI::Col::Button,        State::me.division.color);
             UI::PushStyleColor(UI::Col::ButtonHovered, State::me.division.color * 1.2f);
