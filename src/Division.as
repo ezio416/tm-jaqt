@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-20
+// m 2025-08-21
 
 const vec4[] divisionColors = {
     vec4(vec3(0.45f, 0.27f, 0.13f), 1.0f),
@@ -60,7 +60,10 @@ class Division {
     string           shortName     = divisionShortNames[0];
     DivisionRuleType type          = DivisionRuleType::Unknown;
 
-    Division() { }
+    Division() {
+        color = divisionColors[0];
+    }
+
     Division(Json::Value@ json) {
         if (true
             and json.HasKey("position")
@@ -75,23 +78,9 @@ class Division {
             and position >= 1
             and position <= 13
         ) {
+            color = divisionColors[Math::Min(position - 1, 11) / 3];
             name = divisionNames[position];
             shortName = divisionShortNames[position];
-
-            switch (position) {
-                case 0: case 1: case 2: case 3:
-                    color = divisionColors[0];
-                    break;
-                case 4: case 5: case 6:
-                    color = divisionColors[1];
-                    break;
-                case 7: case 8: case 9:
-                    color = divisionColors[2];
-                    break;
-                default:
-                    color = divisionColors[3];
-            }
-
         } else {
             Log::Warning("Division", "unknown position: " + position);
         }
@@ -166,25 +155,25 @@ class Division {
         @icon = UI::LoadTexture(path);
 
         if (icon is null) {
-            Log::Error("Division::LoadIcon", "not found: " + path);
+            Log::Error("not found: " + path);
         }
     }
 
     void RenderIcon(const vec2&in size, bool hover = false) {
-        if (icon !is null) {
-            UI::Image(icon, size);
-
-            if (true
-                and hover
-                and UI::IsItemHovered()
-            ) {
-                UI::BeginTooltip();
-                UI::Image(icon, icon.GetSize());
-                UI::EndTooltip();
-            }
-
-        } else {
+        if (icon is null) {
             UI::Dummy(size);
+            return;
+        }
+
+        UI::Image(icon, size);
+
+        if (true
+            and hover
+            and UI::IsItemHovered()
+        ) {
+            UI::BeginTooltip();
+            UI::Image(icon, icon.GetSize());
+            UI::EndTooltip();
         }
     }
 
@@ -224,7 +213,7 @@ bool GetDivisionsAsync() {
         return true;
 
     } catch {
-        Log::Error("GetDivisionsAsync", getExceptionInfo());
+        Log::Error(getExceptionInfo());
         return false;
     }
 }

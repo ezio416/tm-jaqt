@@ -1,25 +1,21 @@
 // c 2025-07-03
-// m 2025-07-03
+// m 2025-08-21
 
 namespace Log {
     enum Level {
-        Critical,
         Error,
         Warning,
         Info,
         Debug
     }
 
-    void Critical(const string&in func, const string&in msg) {
-        Write(Level::Critical, func, msg);
-    }
-
     void Debug(const string&in func, const string&in msg) {
         Write(Level::Debug, func, msg);
     }
 
-    void Error(const string&in func, const string&in msg) {
-        Write(Level::Error, func, msg);
+    void Error(const string&in msg) {
+        Write(Level::Error, "", msg);
+        PrintActiveContextStack(true);
     }
 
     void Info(const string&in func, const string&in msg) {
@@ -45,13 +41,9 @@ namespace Log {
             return;
         }
 
-        const string message = func + " | " + msg;
+        const string message = (func.Length > 0 ? func + " | " : "") + msg;
 
         switch (level) {
-            case Level::Critical:
-                error(Icons::ExclamationTriangle + " " + message);
-                break;
-
             case Level::Error:
                 error(message);
                 break;

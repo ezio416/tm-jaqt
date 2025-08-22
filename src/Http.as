@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-20
+// m 2025-08-21
 
 namespace Http {
     namespace Nadeo {
@@ -30,7 +30,7 @@ namespace Http {
                 }
             }
 
-            Log::Error(funcName, "bad response");
+            Log::Error("bad response");
             return null;
         }
 
@@ -55,7 +55,7 @@ namespace Http {
                 }
             }
 
-            Log::Error(funcName, "bad response");
+            Log::Error("bad response");
             return null;
         }
 
@@ -71,7 +71,7 @@ namespace Http {
             try {
                 return req.Json();
             } catch {
-                Log::Error(funcName, endpoint + " | " + getExceptionInfo());
+                Log::Error(endpoint + " | " + getExceptionInfo());
                 return null;
             }
         }
@@ -97,7 +97,7 @@ namespace Http {
                 }
             }
 
-            Log::Error(funcName, "bad response");
+            Log::Error("bad response");
             return null;
         }
 
@@ -122,7 +122,7 @@ namespace Http {
                 }
             }
 
-            Log::Error(funcName, "bad response");
+            Log::Error("bad response");
             return null;
         }
 
@@ -147,7 +147,7 @@ namespace Http {
                 }
             }
 
-            Log::Error(funcName, "bad response");
+            Log::Error("bad response");
             return null;
         }
 
@@ -163,7 +163,7 @@ namespace Http {
             try {
                 return req.Json();
             } catch {
-                Log::Error(funcName, endpoint + " | " + getExceptionInfo());
+                Log::Error(endpoint + " | " + getExceptionInfo());
                 return null;
             }
         }
@@ -184,7 +184,7 @@ namespace Http {
                 }
             }
 
-            Log::Error(funcName, "bad response");
+            Log::Error("bad response");
             return null;
         }
 
@@ -208,7 +208,7 @@ namespace Http {
             try {
                 return req.Json();
             } catch {
-                Log::Error(funcName, endpoint + " | " + body + " | " + getExceptionInfo());
+                Log::Error(endpoint + " | " + body + " | " + getExceptionInfo());
                 return null;
             }
         }
@@ -231,7 +231,7 @@ namespace Http {
                 }
             }
 
-            Log::Error(funcName, "bad response");
+            Log::Error("bad response");
             return null;
         }
 
@@ -277,7 +277,7 @@ namespace Http {
                 Log::Warning(funcName, "didn't find active players");
 
             } catch {
-                Log::Error(funcName, getExceptionInfo());
+                Log::Error(getExceptionInfo());
             }
         }
     }

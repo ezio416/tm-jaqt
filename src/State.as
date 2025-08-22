@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-08-20
+// m 2025-08-21
 
 namespace State {
     uint         activePlayers = 0;
@@ -8,7 +8,7 @@ namespace State {
     UI::Texture@ mapThumbnail;
     string       mapThumbnailUrl;
     Match@       match;
-    Player@      me;
+    Player       me;
     dictionary   players;
     Player@[]    playersArr;
     uint64       queueStart    = 0;

@@ -1,14 +1,37 @@
 // c 2025-07-03
-// m 2025-08-20
+// m 2025-08-21
 
 void RenderMainTabs() {
     UI::BeginTabBar("##tabbar-main");
+
+    const bool color = S_RankColor;  // set here as it can change between its references below
+
+    if (color) {
+        const vec4 active = State::me.division.color * 0.8f;
+        const vec4 hovered = State::me.division.color * 1.2f;
+
+        UI::PushStyleColor(UI::Col::FrameBgHovered,   hovered);
+        UI::PushStyleColor(UI::Col::FrameBgActive,    active);
+        UI::PushStyleColor(UI::Col::CheckMark,        State::me.division.color);
+        UI::PushStyleColor(UI::Col::SliderGrab,       State::me.division.color);
+        UI::PushStyleColor(UI::Col::SliderGrabActive, active);
+        UI::PushStyleColor(UI::Col::Button,           State::me.division.color);
+        UI::PushStyleColor(UI::Col::ButtonHovered,    hovered);
+        UI::PushStyleColor(UI::Col::ButtonActive,     active);
+        UI::PushStyleColor(UI::Col::Tab,              active);
+        UI::PushStyleColor(UI::Col::TabHovered,       hovered);
+        UI::PushStyleColor(UI::Col::TabActive,        State::me.division.color);
+    }
 
     RenderTabRanked();
     RenderTabSettings();
 
     if (S_Debug) {
         RenderTabDebug();
+    }
+
+    if (color) {
+        UI::PopStyleColor(11);
     }
 
     UI::EndTabBar();
@@ -38,9 +61,7 @@ void RenderTabDebug() {
 
     if (UI::BeginTabItem(Icons::User + " Me")) {
         if (UI::BeginChild("##child-debug-me")) {
-            if (State::me !is null) {
-                UI::TextWrapped(Json::Write(State::me.ToJson(), true));
-            }
+            UI::TextWrapped(Json::Write(State::me.ToJson(), true));
         }
 
         UI::EndChild();
@@ -117,42 +138,56 @@ void RenderTabRanked() {
         UI::SetCursorPos(pre);
     }
 
-    if (State::me !is null) {
-        State::me.division.RenderIcon(vec2(scale * 48.0f), true);
-
-        UI::SameLine();
-        UI::AlignTextToFramePadding();
-        UI::BeginGroup();
-        UI::Text("Points: " + State::me.progression);
-        string rank = "Rank: " + State::me.rank;
-        if (State::activePlayers > 0) {
-            rank += " / " + State::activePlayers + Text::Format(" (top %.1f%%)", float(State::me.rank) / State::activePlayers * 100.0f);
-        }
-        UI::Text(rank);
-        UI::EndGroup();
-    }
-
-    UI::BeginDisabled(State::status != State::Status::NotQueued);
-    if (UI::Button(Icons::Play + " Queue")) {
-        startnew(StartQueueAsync);
-    }
-    UI::EndDisabled();
+    State::me.division.RenderIcon(vec2(scale * 64.0f), true);
 
     UI::SameLine();
-    UI::BeginDisabled(false
-        or State::cancel
-        or (true
-            and State::status != State::Status::Queueing
-            and State::status != State::Status::Queued
-        )
-    );
-    if (UI::Button(Icons::Times + " Cancel")) {
-        startnew(CancelQueueAsync);
+    UI::AlignTextToFramePadding();
+    UI::BeginGroup();
+
+    UI::Text("Points: " + State::me.progression);
+
+    string rank = "Rank: " + State::me.rank;
+    if (State::activePlayers > 0) {
+        rank += " / " + State::activePlayers + Text::Format(" (top %.1f%%)", float(State::me.rank) / State::activePlayers * 100.0f);
     }
-    UI::EndDisabled();
+    UI::Text(rank);
+
+    if (State::me.hasPenalty) {
+        UI::Text("Immunity: " + State::me.immunityDays + " days (" + State::me.penalty + ")");
+    }
+
+    UI::EndGroup();
+
+    const vec2 buttonSize = vec2(UI::GetContentRegionAvail().x, scale * 50.0f);
+
+    UI::PushFont(UI::Font::DefaultBold, 24.0f);
+
+    if (State::status == State::Status::NotQueued) {
+        if (UI::Button(Icons::Play + " Queue", buttonSize)) {
+            startnew(StartQueueAsync);
+        }
+    } else {
+        UI::BeginDisabled(false
+            or State::cancel
+            or (true
+                and State::status != State::Status::Queueing
+                and State::status != State::Status::Queued
+            )
+        );
+        if (UI::ButtonColored(
+            Icons::Times + " Cancel",
+            0.0f,
+            size: buttonSize
+        )) {
+            startnew(CancelQueueAsync);
+        }
+        UI::EndDisabled();
+    }
+
+    UI::PopFont();
 
     if (State::mapName.Length > 0) {
-        UI::Text(State::mapName);
+        UI::SeparatorText(State::mapName);
     }
 
     if (State::status == State::Status::InMatch) {

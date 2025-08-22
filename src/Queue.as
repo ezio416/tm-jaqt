@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-07-03
+// m 2025-08-21
 
 void CancelQueueAsync() {
     Http::Nadeo::CancelQueueAsync();
@@ -69,7 +69,7 @@ void StartQueueAsync() {
                                     @State::mapThumbnail = UI::LoadTexture(file.Read(file.Size()));
                                     loadedThumbnail = true;
                                 } catch {
-                                    Log::Error(funcName, "error loading map thumbnail from file: " + getExceptionInfo());
+                                    Log::Error("error loading map thumbnail from file: " + getExceptionInfo());
                                 }
                             }
 
@@ -88,7 +88,7 @@ void StartQueueAsync() {
                                         try {
                                             @State::mapThumbnail = UI::LoadTexture(thumbnail.Buffer());
                                         } catch {
-                                            Log::Error(funcName, "error loading map thumbnail from buffer: " + getExceptionInfo());
+                                            Log::Error("error loading map thumbnail from buffer: " + getExceptionInfo());
                                         }
 
                                         try {
@@ -155,12 +155,12 @@ void StartQueueAsync() {
                                                 player.rank        = uint(results[i]["rank"]);
                                                 player.progression = uint(results[i]["score"]);
                                             } catch {
-                                                Log::Error(funcName, getExceptionInfo());
+                                                Log::Error(getExceptionInfo());
                                             }
                                         }
                                     }
                                 } else {
-                                    Log::Error(funcName, "leaderboard error");
+                                    Log::Error("leaderboard error");
                                 }
                             }
                         }

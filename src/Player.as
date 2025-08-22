@@ -1,11 +1,10 @@
 // c 2025-07-02
-// m 2025-08-20
+// m 2025-08-21
 
 class Player {
     string     accountId;
     bool       hasPenalty   = false;
     uint       immunityDays = 0;
-    uint       matchPb      = 0;
     string     name;
     uint       pb           = 0;
     uint64     pbTimestamp  = 0;
@@ -58,7 +57,6 @@ class Player {
         ret["division"]     = division.ToJson();
         ret["hasPenalty"]   = hasPenalty;
         ret["immunityDays"] = immunityDays;
-        ret["matchPb"]      = matchPb;
         ret["name"]         = name;
         ret["pb"]           = pb;
         ret["pbTimestamp"]  = pbTimestamp;
@@ -80,9 +78,7 @@ class Player {
 void GetMyStatusAsync() {
     const string funcName = "GetMyStatusAsync";
 
-    if (State::me is null) {
-        @State::me = Player();
-
+    if (!State::me.self) {
         State::me.accountId = GetApp().LocalPlayerInfo.WebServicesUserId;
         State::me.self = true;
     }
