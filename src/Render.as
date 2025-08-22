@@ -37,6 +37,100 @@ void RenderMainTabs() {
     UI::EndTabBar();
 }
 
+void RenderRankedContents() {
+    const float scale = UI::GetScale();
+
+    if (State::mapThumbnail !is null) {
+        const vec2 pre = UI::GetCursorPos();
+        UI::ImageWithBg(State::mapThumbnail, UI::GetContentRegionAvail(), tint_col: vec4(vec3(1.0f), 0.05f));
+        UI::SetCursorPos(pre);
+    }
+
+    State::me.division.RenderIcon(vec2(scale * 64.0f), true);
+
+    UI::SameLine();
+    UI::AlignTextToFramePadding();
+    UI::BeginGroup();
+
+    UI::Text("Points: " + State::me.progression);
+
+    string rank = "Rank: " + State::me.rank;
+    if (State::activePlayers > 0) {
+        rank += " / " + State::activePlayers + Text::Format(" (top %.1f%%)", float(State::me.rank) / State::activePlayers * 100.0f);
+    }
+    UI::Text(rank);
+
+    if (State::me.hasPenalty) {
+        UI::Text("Immunity: " + State::me.immunityDays + " days (" + State::me.penalty + " pts)");
+    }
+
+    UI::EndGroup();
+
+    const vec2 buttonSize = vec2(UI::GetContentRegionAvail().x, scale * 50.0f);
+
+    UI::PushFont(UI::Font::DefaultBold, 24.0f);
+
+    if (State::status == State::Status::NotQueued) {
+        if (UI::Button(Icons::Play + " Queue", buttonSize)) {
+            startnew(StartQueueAsync);
+        }
+    } else {
+        UI::BeginDisabled(false
+            or State::cancel
+            or (true
+                and State::status != State::Status::Queueing
+                and State::status != State::Status::Queued
+            )
+        );
+        if (UI::ButtonColored(
+            Icons::Times + " Cancel",
+            0.0f,
+            size: buttonSize
+        )) {
+            startnew(CancelQueueAsync);
+        }
+        UI::EndDisabled();
+    }
+
+    UI::PopFont();
+
+    if (State::mapName.Length > 0) {
+        UI::SeparatorText(State::mapName);
+    }
+
+    if (State::status == State::Status::InMatch) {
+        Player@ player;
+
+        UI::SeparatorText("Blue");
+        for (uint i = 0; i < State::playersArr.Length; i++) {
+            @player = State::playersArr[i];
+            if (player.team == 1) {
+                player.division.RenderIcon(scale * 24.0f, true);
+                UI::SameLine();
+                UI::AlignTextToFramePadding();
+                UI::Text(player.name + " | " + player.score);
+            }
+        }
+
+        UI::SeparatorText("Red");
+        for (uint i = 0; i < State::playersArr.Length; i++) {
+            @player = State::playersArr[i];
+            if (player.team == 2) {
+                player.division.RenderIcon(scale * 24.0f, true);
+                UI::SameLine();
+                UI::AlignTextToFramePadding();
+                UI::Text(player.name + " | " + player.score);
+            }
+        }
+    }
+}
+
+void RenderSoundTestButton() {
+    if (UI::Button(Icons::Play + " Test")) {
+        PlaySound();
+    }
+}
+
 void RenderStatusBar() {
     if (UI::BeginMenuBar()) {
         string statusString = "\\$AAA" + tostring(State::status);
@@ -130,91 +224,7 @@ void RenderTabRanked() {
         return;
     }
 
-    const float scale = UI::GetScale();
-
-    if (State::mapThumbnail !is null) {
-        const vec2 pre = UI::GetCursorPos();
-        UI::ImageWithBg(State::mapThumbnail, UI::GetContentRegionAvail(), tint_col: vec4(vec3(1.0f), 0.05f));
-        UI::SetCursorPos(pre);
-    }
-
-    State::me.division.RenderIcon(vec2(scale * 64.0f), true);
-
-    UI::SameLine();
-    UI::AlignTextToFramePadding();
-    UI::BeginGroup();
-
-    UI::Text("Points: " + State::me.progression);
-
-    string rank = "Rank: " + State::me.rank;
-    if (State::activePlayers > 0) {
-        rank += " / " + State::activePlayers + Text::Format(" (top %.1f%%)", float(State::me.rank) / State::activePlayers * 100.0f);
-    }
-    UI::Text(rank);
-
-    if (State::me.hasPenalty) {
-        UI::Text("Immunity: " + State::me.immunityDays + " days (" + State::me.penalty + ")");
-    }
-
-    UI::EndGroup();
-
-    const vec2 buttonSize = vec2(UI::GetContentRegionAvail().x, scale * 50.0f);
-
-    UI::PushFont(UI::Font::DefaultBold, 24.0f);
-
-    if (State::status == State::Status::NotQueued) {
-        if (UI::Button(Icons::Play + " Queue", buttonSize)) {
-            startnew(StartQueueAsync);
-        }
-    } else {
-        UI::BeginDisabled(false
-            or State::cancel
-            or (true
-                and State::status != State::Status::Queueing
-                and State::status != State::Status::Queued
-            )
-        );
-        if (UI::ButtonColored(
-            Icons::Times + " Cancel",
-            0.0f,
-            size: buttonSize
-        )) {
-            startnew(CancelQueueAsync);
-        }
-        UI::EndDisabled();
-    }
-
-    UI::PopFont();
-
-    if (State::mapName.Length > 0) {
-        UI::SeparatorText(State::mapName);
-    }
-
-    if (State::status == State::Status::InMatch) {
-        Player@ player;
-
-        UI::SeparatorText("Blue");
-        for (uint i = 0; i < State::playersArr.Length; i++) {
-            @player = State::playersArr[i];
-            if (player.team == 1) {
-                player.division.RenderIcon(scale * 24.0f, true);
-                UI::SameLine();
-                UI::AlignTextToFramePadding();
-                UI::Text(player.name + " | " + player.score);
-            }
-        }
-
-        UI::SeparatorText("Red");
-        for (uint i = 0; i < State::playersArr.Length; i++) {
-            @player = State::playersArr[i];
-            if (player.team == 2) {
-                player.division.RenderIcon(scale * 24.0f, true);
-                UI::SameLine();
-                UI::AlignTextToFramePadding();
-                UI::Text(player.name + " | " + player.score);
-            }
-        }
-    }
+    RenderRankedContents();
 
     UI::EndChild();
     UI::EndTabItem();
@@ -228,13 +238,24 @@ void RenderTabSettings() {
     if (UI::BeginChild("##child-settings")) {
         S_HideWithGame = UI::Checkbox("Show/hide with game UI", S_HideWithGame);
         S_HideWithOP = UI::Checkbox("Show/hide with Openplanet UI", S_HideWithOP);
-        S_Debug = UI::Checkbox("Show debug tab", S_Debug);
         S_RankColor = UI::Checkbox("Use current rank for UI color", S_RankColor);
+        S_MenuMain = UI::Checkbox("Show item in top menu", S_MenuMain);
 
         S_Volume = UI::SliderFloat("Notification volume", S_Volume, 0.0f, 100.0f, flags: UI::SliderFlags::AlwaysClamp);
-        if (UI::Button(Icons::Play + " Test")) {
-            PlaySound();
+        RenderSoundTestButton();
+
+        if (UI::BeginCombo("Log level", tostring(S_LogLevel), UI::ComboFlags::HeightLargest)) {
+            for (uint i = 0; i <= Log::Level::Debug; i++) {
+                const Log::Level level = Log::Level(i);
+                if (UI::Selectable(tostring(level), S_LogLevel == level)) {
+                    S_LogLevel = level;
+                }
+            }
+
+            UI::EndCombo();
         }
+
+        S_Debug = UI::Checkbox("Show debug tab", S_Debug);
     }
 
     UI::EndChild();

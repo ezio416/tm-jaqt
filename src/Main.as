@@ -78,6 +78,45 @@ void RenderMenu() {
     }
 }
 
+void RenderMenuMain() {
+    if (!S_MenuMain) {
+        return;
+    }
+
+    string title = pluginColor + pluginIcon + "\\$G Ranked";
+    switch (State::status) {
+        case State::Status::NotQueued:
+            break;
+
+        case State::Status::Queueing:
+        case State::Status::Queued:
+        case State::Status::MatchFound:
+        case State::Status::Joining:
+            title += "\\$AAA (queued for " + Time::Format(Time::Now - State::queueStart, false) + ")";
+            break;
+
+        case State::Status::InMatch:
+            title += "\\$AAA (in match)";
+            break;
+    }
+
+    if (UI::BeginMenu(title)) {
+        if (S_RankColor) {
+            UI::PushStyleColor(UI::Col::Button,        State::me.division.color);
+            UI::PushStyleColor(UI::Col::ButtonHovered, State::me.division.color * 1.2f);
+            UI::PushStyleColor(UI::Col::ButtonActive,  State::me.division.color * 0.8f);
+        }
+
+        RenderRankedContents();
+
+        if (S_RankColor) {
+            UI::PopStyleColor(3);
+        }
+
+        UI::EndMenu();
+    }
+}
+
 void PlaySound() {
     if (sound !is null) {
         Audio::Play(sound, S_Volume / 100.0f);
