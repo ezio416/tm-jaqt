@@ -94,15 +94,19 @@ void RenderMenuMain() {
         case State::Status::Queued:
         case State::Status::MatchFound:
         case State::Status::Joining:
-            title += "\\$AAA (queued for " + Time::Format(Time::Now - State::queueStart, false) + ")";
+            title += "\\$6C6 (queued for " + Time::Format(Time::Now - State::queueStart, false) + ")";
             break;
 
         case State::Status::InMatch:
-            title += "\\$AAA (in match)";
+            title += "\\$6CC (in match)";
+            break;
+
+        case State::Status::MatchEnd:
+            title += "\\$66C (match end)";
             break;
 
         case State::Status::Banned:
-            title += "\\$A00 (banned)";
+            title += "\\$C66 (banned)";
             break;
     }
 

@@ -4,6 +4,7 @@
 namespace State {
     uint         activePlayers = 0;
     bool         cancel        = false;
+    bool         frozen        = false;
     string       mapName;
     UI::Texture@ mapThumbnail;
     string       mapThumbnailUrl;
@@ -21,6 +22,7 @@ namespace State {
         MatchFound,
         Joining,
         InMatch,
+        MatchEnd,
         Banned
     }
 

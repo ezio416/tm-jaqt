@@ -3,6 +3,7 @@
 
 class Player {
     string     accountId;
+    bool       frozen       = false;
     bool       hasPenalty   = false;
     uint       immunityDays = 0;
     string     name;
@@ -10,34 +11,36 @@ class Player {
     CSmPlayer@ player;
     uint       progression  = 0;
     uint       rank         = 0;
-    uint       score        = 0;
     bool       self         = false;
-    int        team         = -1;
 
     Division@ get_division() {
         return GetPlayerDivision(progression, rank);
     }
 
+    private uint _score = 0;
     uint get_score() {
         if (true
+            and !frozen
             and player !is null
             and player.Score !is null
         ) {
-            return player.Score.Points;
+            _score = player.Score.Points;
         }
 
-        return 0;
+        return _score;
     }
 
+    private int _team = -1;
     int get_team() {
         if (true
+            and !frozen
             and player !is null
             and player.Score !is null
         ) {
-            return player.Score.TeamNum;
+            _team = player.Score.TeamNum;
         }
 
-        return -1;
+        return _team;
     }
 
     Player() { }

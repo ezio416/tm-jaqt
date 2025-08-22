@@ -72,6 +72,7 @@ void RenderRankedContents() {
 
     switch (State::status) {
         case State::Status::NotQueued:
+        case State::Status::MatchEnd:
             if (UI::Button(Icons::Play + " Queue", buttonSize)) {
                 startnew(StartQueueAsync);
             }
@@ -107,31 +108,54 @@ void RenderRankedContents() {
         UI::SeparatorText(State::mapName);
     }
 
-    if (State::status == State::Status::InMatch) {
+    if (false
+        or State::status == State::Status::InMatch
+        or State::status == State::Status::MatchEnd
+    ) {
         Player@ player;
 
-        UI::SeparatorText("Blue");
-        for (uint i = 0; i < State::playersArr.Length; i++) {
-            @player = State::playersArr[i];
-            if (player.team == 1) {
-                player.division.RenderIcon(scale * 24.0f, true);
-                UI::SameLine();
-                UI::AlignTextToFramePadding();
-                UI::Text(player.name + " | " + player.score);
-            }
-        }
+        if (UI::BeginTable("##table-players", 4, UI::TableFlags::SizingStretchProp)) {
+            UI::TableSetupColumn("team",   UI::TableColumnFlags::WidthFixed, scale * 20.0f);
+            UI::TableSetupColumn("points", UI::TableColumnFlags::WidthFixed, scale * 20.0f);
+            UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+            UI::TableSetupColumn("name");
 
-        UI::SeparatorText("Red");
-        for (uint i = 0; i < State::playersArr.Length; i++) {
-            @player = State::playersArr[i];
-            if (player.team == 2) {
-                player.division.RenderIcon(scale * 24.0f, true);
-                UI::SameLine();
-                UI::AlignTextToFramePadding();
-                UI::Text(player.name + " | " + player.score);
+            for (uint i = 0; i < State::playersArr.Length; i++) {
+                @player = State::playersArr[i];
+                if (player.team == 1) {
+                    RenderPlayerRow(player);
+                }
             }
+
+            for (uint i = 0; i < State::playersArr.Length; i++) {
+                @player = State::playersArr[i];
+                if (player.team == 2) {
+                    RenderPlayerRow(player);
+                }
+            }
+
+            UI::EndTable();
         }
     }
+}
+
+void RenderPlayerRow(Player@ player) {
+    UI::TableNextRow();
+
+    UI::TableNextColumn();
+    UI::AlignTextToFramePadding();
+    UI::Text((player.team == 1 ? "\\$66F" : "\\$F66") + Icons::Circle);
+
+    UI::TableNextColumn();
+    UI::AlignTextToFramePadding();
+    UI::Text(tostring(player.score));
+
+    UI::TableNextColumn();
+    player.division.RenderIcon(UI::GetScale() * 24.0f, true);
+
+    UI::TableNextColumn();
+    UI::AlignTextToFramePadding();
+    UI::Text(player.name);
 }
 
 void RenderSoundTestButton() {
@@ -209,6 +233,7 @@ void RenderTabDebug() {
         if (UI::BeginChild("##child-debug-other")) {
             UI::Text("active players: " + State::activePlayers);
             UI::Text("cancel: " + State::cancel);
+            UI::Text("frozen: " + State::frozen);
             UI::Text("map name: " + State::mapName);
             UI::Text("map thumbnail URL: " + State::mapThumbnailUrl);
             UI::Text("queueStart: " + State::queueStart);

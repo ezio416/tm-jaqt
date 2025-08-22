@@ -6,13 +6,12 @@ void CancelQueueAsync() {
 }
 
 void StartQueueAsync() {
-    if (State::status == State::Status::Banned) {
-        return;
-    }
-
     const string funcName = "StartQueueAsync";
 
-    if (State::status != State::Status::NotQueued) {
+    if (true
+        and State::status != State::Status::NotQueued
+        and State::status != State::Status::MatchEnd
+    ) {
         Log::Warning(funcName, "can't start queue, status: " + tostring(State::status));
         return;
     }
@@ -26,6 +25,7 @@ void StartQueueAsync() {
     ) {
         if (State::cancel) {
             State::cancel = false;
+            State::frozen = false;
             State::SetStatus(State::Status::NotQueued);
             break;
         }
@@ -139,60 +139,76 @@ void StartQueueAsync() {
                 uint playerCount = 0;
 
                 while (true) {
-                    if (cast<CSmArenaClient>(App.CurrentPlayground) !is null) {
-                        if (playerCount != App.CurrentPlayground.Players.Length) {
-                            Log::Debug(funcName, "player count changed: " + playerCount);
+                    if (!State::frozen) {
+                        if (cast<CSmArenaClient>(App.CurrentPlayground) !is null) {
+                            if (playerCount != App.CurrentPlayground.Players.Length) {
+                                Log::Debug(funcName, "player count changed, was " + playerCount);
 
-                            playerCount = App.CurrentPlayground.Players.Length;
-                            State::players.DeleteAll();
-                            State::playersArr = {};
+                                playerCount = App.CurrentPlayground.Players.Length;
+                                State::players.DeleteAll();
+                                State::playersArr = {};
 
-                            string[] accountIds;
+                                string[] accountIds;
 
-                            for (uint i = 0; i < App.CurrentPlayground.Players.Length; i++) {
-                                auto player = Player(cast<CSmPlayer>(App.CurrentPlayground.Players[i]));
-                                if (player.accountId.Length > 0) {
-                                    State::playersArr.InsertLast(player);
-                                    State::players.Set(player.accountId, @player);
+                                for (uint i = 0; i < App.CurrentPlayground.Players.Length; i++) {
+                                    auto player = Player(cast<CSmPlayer>(App.CurrentPlayground.Players[i]));
+                                    if (player.accountId.Length > 0) {
+                                        State::playersArr.InsertLast(player);
+                                        State::players.Set(player.accountId, @player);
 
-                                    accountIds.InsertLast(player.accountId);
+                                        accountIds.InsertLast(player.accountId);
+                                    }
                                 }
-                            }
 
-                            Json::Value@ leaderboard = Http::Nadeo::GetLeaderboardPlayersAsync(accountIds);
-                            if (leaderboard !is null) {
-                                if (leaderboard.HasKey("results")) {
-                                    Json::Value@ results = leaderboard["results"];
-                                    if (true
-                                        and results.GetType() == Json::Type::Array
-                                        and results.Length == accountIds.Length
-                                    ) {
-                                        for (uint i = 0; i < results.Length; i++) {
-                                            try {
-                                                auto player = cast<Player>(State::players[string(results[i]["player"])]);
-                                                player.rank        = uint(results[i]["rank"]);
-                                                player.progression = uint(results[i]["score"]);
-                                            } catch {
-                                                Log::Error(getExceptionInfo());
+                                Json::Value@ leaderboard = Http::Nadeo::GetLeaderboardPlayersAsync(accountIds);
+                                if (leaderboard !is null) {
+                                    if (leaderboard.HasKey("results")) {
+                                        Json::Value@ results = leaderboard["results"];
+                                        if (true
+                                            and results.GetType() == Json::Type::Array
+                                            and results.Length == accountIds.Length
+                                        ) {
+                                            for (uint i = 0; i < results.Length; i++) {
+                                                try {
+                                                    auto player = cast<Player>(State::players[string(results[i]["player"])]);
+                                                    player.rank        = uint(results[i]["rank"]);
+                                                    player.progression = uint(results[i]["score"]);
+                                                } catch {
+                                                    Log::Error(getExceptionInfo());
+                                                }
                                             }
                                         }
+                                    } else {
+                                        Log::Error("leaderboard error");
                                     }
-                                } else {
-                                    Log::Error("leaderboard error");
                                 }
                             }
+                        } else {
+                            playerCount       = 0;
+                            State::players.DeleteAll();
+                            State::playersArr = {};
                         }
-                    } else {
-                        playerCount       = 0;
-                        State::players.DeleteAll();
-                        State::playersArr = {};
+                    }
+
+                    if (true
+                        and !State::frozen
+                        and cast<CSmArenaClient>(App.CurrentPlayground) !is null
+                        and App.CurrentPlayground.UIConfigs.Length > 0
+                        and App.CurrentPlayground.UIConfigs[0] !is null
+                        and App.CurrentPlayground.UIConfigs[0].UISequence == CGamePlaygroundUIConfig::EUISequence::Podium
+                    ) {
+                        for (uint i = 0; i < State::playersArr.Length; i++) {
+                            State::playersArr[i].frozen = true;
+                            Log::Debug(funcName, "froze player: " + tostring(State::playersArr[i]));
+                        }
+                        State::frozen = true;
                     }
 
                     @State::match = Match(Http::Nadeo::GetMatchInfoAsync(liveId));
 
                     if (State::match.status == MatchStatus::COMPLETED) {
                         Log::Info(funcName, "match completed");
-                        State::SetStatus(State::Status::NotQueued);
+                        State::SetStatus(State::Status::MatchEnd);
 
                         State::mapName         = "";
                         @State::mapThumbnail   = null;
@@ -203,11 +219,31 @@ void StartQueueAsync() {
                         break;
                     }
 
-                    sleep(5000);
+                    sleep(5000);  // note 250821: this is too long but I don't want to make requests every frame or something
+                }
+
+                while (true  // can this happen?
+                    and cast<CSmArenaClient>(App.CurrentPlayground) !is null
+                    and App.CurrentPlayground.UIConfigs.Length > 0
+                    and App.CurrentPlayground.UIConfigs[0] !is null
+                    and App.CurrentPlayground.UIConfigs[0].UISequence != CGamePlaygroundUIConfig::EUISequence::Podium
+                ) {
+                    yield();
+                }
+
+                while (true
+                    and cast<CSmArenaClient>(App.CurrentPlayground) !is null
+                    and App.CurrentPlayground.UIConfigs.Length > 0
+                    and App.CurrentPlayground.UIConfigs[0] !is null
+                    and App.CurrentPlayground.UIConfigs[0].UISequence == CGamePlaygroundUIConfig::EUISequence::Podium
+                ) {
+                    yield();
                 }
 
                 State::players.DeleteAll();
                 State::playersArr = {};
+                State::SetStatus(State::Status::NotQueued);
+                State::frozen = false;
 
                 break;
             }
