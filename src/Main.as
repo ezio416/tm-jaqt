@@ -92,9 +92,12 @@ void RenderMenuMain() {
 
         case State::Status::Queueing:
         case State::Status::Queued:
+            title += "\\$6C6 (queued for " + Time::Format(Time::Now - State::queueStart, false) + ")";
+            break;
+
         case State::Status::MatchFound:
         case State::Status::Joining:
-            title += "\\$6C6 (queued for " + Time::Format(Time::Now - State::queueStart, false) + ")";
+            title += "\\$6CC (match found)";
             break;
 
         case State::Status::InMatch:
