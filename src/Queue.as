@@ -36,12 +36,12 @@ void StartQueueAsync() {
                 and heartbeat.HasKey("banEndDate")
                 and heartbeat["banEndDate"].GetType() != Json::Type::Null
             ) {
-                string msg = "you're banned! | ";
-                msg += (heartbeat["banEndDate"].GetType() == Json::Type::Number
-                    ? "until " + Time::FormatString("%F %T", int64(heartbeat["banEndDate"]))
-                    : Json::Write(heartbeat["banEndDate"])
+                Log::Error("you're banned! | "
+                    + (heartbeat["banEndDate"].GetType() == Json::Type::Number
+                        ? "until " + Time::FormatString("%F %T", int64(heartbeat["banEndDate"]))
+                        : Json::Write(heartbeat["banEndDate"])
+                    )
                 );
-                Log::Error(msg);
                 State::SetStatus(State::Status::Banned);
                 break;
             }
