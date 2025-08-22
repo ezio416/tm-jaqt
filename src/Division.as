@@ -51,6 +51,7 @@ enum DivisionRuleType {
 
 class Division {
     vec4             color         = divisionColors[0];
+    string           colorStr      = Text::FormatOpenplanetColor(color.xyz);
     UI::Texture@     icon;
     uint             maximumPoints = 0;
     uint             minimumPoints = 0;
@@ -60,10 +61,7 @@ class Division {
     string           shortName     = divisionShortNames[0];
     DivisionRuleType type          = DivisionRuleType::Unknown;
 
-    Division() {
-        color = divisionColors[0];
-    }
-
+    Division() { }
     Division(Json::Value@ json) {
         if (true
             and json.HasKey("position")
@@ -79,6 +77,7 @@ class Division {
             and position <= 13
         ) {
             color = divisionColors[Math::Min(position - 1, 11) / 3];
+            colorStr = Text::FormatOpenplanetColor(color.xyz);
             name = divisionNames[position];
             shortName = divisionShortNames[position];
         } else {

@@ -5,7 +5,7 @@ const string  pluginIcon = Icons::Gamepad;
 Meta::Plugin@ pluginMeta = Meta::ExecutingPlugin();
 
 string get_pluginColor() {
-    return Text::FormatOpenplanetColor(State::me.division.color.xyz);
+    return State::me.division.colorStr;
 }
 
 string get_pluginTitle() {
