@@ -70,26 +70,35 @@ void RenderRankedContents() {
 
     UI::PushFont(UI::Font::DefaultBold, 24.0f);
 
-    if (State::status == State::Status::NotQueued) {
-        if (UI::Button(Icons::Play + " Queue", buttonSize)) {
-            startnew(StartQueueAsync);
-        }
-    } else {
-        UI::BeginDisabled(false
-            or State::cancel
-            or (true
-                and State::status != State::Status::Queueing
-                and State::status != State::Status::Queued
-            )
-        );
-        if (UI::ButtonColored(
-            Icons::Times + " Cancel",
-            0.0f,
-            size: buttonSize
-        )) {
-            startnew(CancelQueueAsync);
-        }
-        UI::EndDisabled();
+    switch (State::status) {
+        case State::Status::NotQueued:
+            if (UI::Button(Icons::Play + " Queue", buttonSize)) {
+                startnew(StartQueueAsync);
+            }
+            break;
+
+        case State::Status::Banned:
+            UI::BeginDisabled();
+            UI::Button(Icons::Ban + " Banned", buttonSize);
+            UI::EndDisabled();
+            break;
+
+        default:
+            UI::BeginDisabled(false
+                or State::cancel
+                or (true
+                    and State::status != State::Status::Queueing
+                    and State::status != State::Status::Queued
+                )
+            );
+            if (UI::ButtonColored(
+                Icons::Times + " Cancel",
+                0.0f,
+                size: buttonSize
+            )) {
+                startnew(CancelQueueAsync);
+            }
+            UI::EndDisabled();
     }
 
     UI::PopFont();

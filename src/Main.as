@@ -100,6 +100,10 @@ void RenderMenuMain() {
         case State::Status::InMatch:
             title += "\\$AAA (in match)";
             break;
+
+        case State::Status::Banned:
+            title += "\\$A00 (banned)";
+            break;
     }
 
     if (UI::BeginMenu(title)) {

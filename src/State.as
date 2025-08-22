@@ -20,7 +20,8 @@ namespace State {
         Queued,
         MatchFound,
         Joining,
-        InMatch
+        InMatch,
+        Banned
     }
 
     void SetStatus(const Status s) {

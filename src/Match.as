@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-07-03
+// m 2025-08-21
 
 enum MatchStatus {
     Unknown,
@@ -93,7 +93,7 @@ class Match {
 
         App.ManiaPlanetScriptAPI.OpenLink(joinLink, CGameManiaPlanetScriptAPI::ELinkType::ManialinkBrowser);
 
-        State::status = State::Status::Joining;
+        State::SetStatus(State::Status::Joining);
 
         return true;
     }

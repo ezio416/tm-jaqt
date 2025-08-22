@@ -6,6 +6,10 @@ void CancelQueueAsync() {
 }
 
 void StartQueueAsync() {
+    if (State::status == State::Status::Banned) {
+        return;
+    }
+
     const string funcName = "StartQueueAsync";
 
     if (State::status != State::Status::NotQueued) {
@@ -28,6 +32,15 @@ void StartQueueAsync() {
 
         Json::Value@ heartbeat = Http::Nadeo::SendHeartbeatAsync();
         if (heartbeat !is null) {
+            if (true
+                and heartbeat.HasKey("banEndDate")
+                and heartbeat["banEndDate"].GetType() != Json::Type::Null
+            ) {
+                Log::Error("you're banned! | " + Json::Write(heartbeat["banEndDate"]));
+                State::SetStatus(State::Status::Banned);
+                break;
+            }
+
             if (true
                 and heartbeat.HasKey("status")
                 and heartbeat["status"].GetType() == Json::Type::String

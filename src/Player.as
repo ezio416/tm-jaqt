@@ -6,8 +6,6 @@ class Player {
     bool       hasPenalty   = false;
     uint       immunityDays = 0;
     string     name;
-    uint       pb           = 0;
-    uint64     pbTimestamp  = 0;
     int        penalty      = 0;
     CSmPlayer@ player;
     uint       progression  = 0;
@@ -58,8 +56,6 @@ class Player {
         ret["hasPenalty"]   = hasPenalty;
         ret["immunityDays"] = immunityDays;
         ret["name"]         = name;
-        ret["pb"]           = pb;
-        ret["pbTimestamp"]  = pbTimestamp;
         ret["penalty"]      = penalty;
         ret["progression"]  = progression;
         ret["rank"]         = rank;
