@@ -65,7 +65,7 @@ void Render() {
         return;
     }
 
-    UI::SetNextWindowSize(400, 400, UI::Cond::FirstUseEver);
+    UI::SetNextWindowSize(300, 300, UI::Cond::FirstUseEver);
 
     if (UI::Begin(pluginTitle + "###main-" + pluginMeta.ID, S_Enabled, UI::WindowFlags::MenuBar)) {
         RenderStatusBar();
