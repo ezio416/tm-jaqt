@@ -1,9 +1,7 @@
 // c 2025-07-02
-// m 2025-08-22
+// m 2025-08-23
 
-void CancelQueueAsync() {
-    Http::Nadeo::CancelQueueAsync();
-}
+uint64 lastMatchInfoRequest = 0;
 
 void StartQueueAsync() {
     const string funcName = "StartQueueAsync";
@@ -29,6 +27,17 @@ void StartQueueAsync() {
             State::frozen = false;
             State::SetStatus(State::Status::NotQueued);
             break;
+        }
+
+        while (Time::Now - Http::Nadeo::lastHeartbeat < 5000) {
+            yield();
+
+            if (State::cancel) {
+                State::cancel = false;
+                State::frozen = false;
+                State::SetStatus(State::Status::NotQueued);
+                break;
+            }
         }
 
         Json::Value@ heartbeat = Http::Nadeo::SendHeartbeatAsync();
@@ -149,6 +158,8 @@ void StartQueueAsync() {
                 uint playerCount = 0;
 
                 while (true) {
+                    yield();
+
                     if (!State::frozen) {
                         if (cast<CSmArenaClient>(App.CurrentPlayground) !is null) {
                             if (playerCount != App.CurrentPlayground.Players.Length) {
@@ -194,9 +205,9 @@ void StartQueueAsync() {
                                 }
                             }
                         } else {
-                            playerCount       = 0;
                             State::players.DeleteAll();
                             State::playersArr = {};
+                            playerCount       = 0;
                         }
                     }
 
@@ -214,22 +225,23 @@ void StartQueueAsync() {
                         State::frozen = true;
                     }
 
-                    @State::match = Match(Http::Nadeo::GetMatchInfoAsync(liveId));
+                    if (Time::Now - lastMatchInfoRequest > 5000) {
+                        @State::match = Match(Http::Nadeo::GetMatchInfoAsync(liveId));
+                        lastMatchInfoRequest = Time::Now;
 
-                    if (State::match.status == MatchStatus::COMPLETED) {
-                        Log::Info(funcName, "match completed");
-                        State::SetStatus(State::Status::MatchEnd);
+                        if (State::match.status == MatchStatus::COMPLETED) {
+                            Log::Info(funcName, "match completed");
+                            State::SetStatus(State::Status::MatchEnd);
 
-                        State::mapName         = "";
-                        @State::mapThumbnail   = null;
-                        State::mapThumbnailUrl = "";
+                            State::mapName         = "";
+                            @State::mapThumbnail   = null;
+                            State::mapThumbnailUrl = "";
 
-                        startnew(GetMyStatusAsync);
+                            startnew(GetMyStatusAsync);
 
-                        break;
+                            break;
+                        }
                     }
-
-                    sleep(5000);  // note 250821: this is too long but I don't want to make requests every frame or something
                 }
 
                 while (true  // can this happen?
@@ -255,15 +267,6 @@ void StartQueueAsync() {
                 State::SetStatus(State::Status::NotQueued);
                 State::frozen = false;
 
-                break;
-            }
-        }
-
-        while (Time::Now - Http::Nadeo::lastHeartbeat < 5000) {
-            yield();
-
-            if (State::cancel) {
-                State::cancel = false;
                 break;
             }
         }
