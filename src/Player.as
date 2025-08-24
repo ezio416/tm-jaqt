@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-21
+// m 2025-08-22
 
 class Player {
     string     accountId;
@@ -7,6 +7,7 @@ class Player {
     bool       hasPenalty   = false;
     uint       immunityDays = 0;
     string     name;
+    bool       online       = false;
     int        penalty      = 0;
     CSmPlayer@ player;
     uint       progression  = 0;
@@ -49,6 +50,11 @@ class Player {
         name         = player.User.Name;
         @this.player = player;
         this.player.MwAddRef();
+    }
+    Player(CFriend@ friend) {
+        accountId = friend.AccountId;
+        name      = friend.DisplayName;
+        online    = friend.Presence == "Online";
     }
 
     Json::Value@ ToJson() {
