@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-08-21
+// m 2025-08-22
 
 namespace State {
     uint         activePlayers = 0;
@@ -18,6 +18,7 @@ namespace State {
     enum Status {
         NotQueued,
         Queueing,
+        WaitingForPartner,
         Queued,
         MatchFound,
         Joining,
@@ -31,16 +32,16 @@ namespace State {
     }
 
     void SetStatus(const string&in s) {
-        const string funcName = "State::SetStatus";
-
         if (s == "queued") {
             SetStatus(Status::Queued);
         } else if (s == "match_ready") {
             SetStatus(Status::MatchFound);
         } else if (s == "canceled") {
             SetStatus(Status::NotQueued);
+        } else if (s == "pending") {
+            SetStatus(Status::WaitingForPartner);
         } else {
-            Log::Warning(funcName, "unknown status: " + s);
+            Log::Error("unknown status: " + s);
             SetStatus(Status::NotQueued);
         }
     }

@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-21
+// m 2025-08-23
 
 const string  pluginIcon = Icons::Gamepad;
 Meta::Plugin@ pluginMeta = Meta::ExecutingPlugin();
@@ -36,6 +36,7 @@ void OnDestroyed() {
 void OnDisabled() {
     switch (State::status) {
         case State::Status::Queueing:
+        case State::Status::WaitingForPartner:
         case State::Status::Queued:
             Log::Warning("OnDisabled", "canceling queue");
 
@@ -88,6 +89,10 @@ void RenderMenuMain() {
     string title = pluginColor + pluginIcon + "\\$G Ranked";
     switch (State::status) {
         case State::Status::NotQueued:
+            break;
+
+        case State::Status::WaitingForPartner:
+            title += "\\6C6 (waiting for partner)";
             break;
 
         case State::Status::Queueing:

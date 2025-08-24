@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-08-21
+// m 2025-08-23
 
 void RenderMainTabs() {
     UI::BeginTabBar("##tabbar-main");
@@ -89,6 +89,7 @@ void RenderRankedContents() {
                 or State::cancel
                 or (true
                     and State::status != State::Status::Queueing
+                    and State::status != State::Status::WaitingForPartner
                     and State::status != State::Status::Queued
                 )
             );
@@ -170,6 +171,7 @@ void RenderStatusBar() {
 
         switch (State::status) {
             case State::Status::Queueing:
+            case State::Status::WaitingForPartner:
             case State::Status::Queued:
                 statusString += "  " + Time::Format(Time::Now - State::queueStart, false);
         }

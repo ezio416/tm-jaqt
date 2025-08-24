@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-21
+// m 2025-08-22
 
 void CancelQueueAsync() {
     Http::Nadeo::CancelQueueAsync();
@@ -21,6 +21,7 @@ void StartQueueAsync() {
 
     while (false
         or State::status == State::Status::Queueing
+        or State::status == State::Status::WaitingForPartner
         or State::status == State::Status::Queued
     ) {
         if (State::cancel) {
@@ -50,7 +51,16 @@ void StartQueueAsync() {
                 and heartbeat.HasKey("status")
                 and heartbeat["status"].GetType() == Json::Type::String
             ) {
+                const State::Status prev = State::status;
+
                 State::SetStatus(string(heartbeat["status"]));
+
+                if (true
+                    and prev == State::Status::WaitingForPartner
+                    and State::status != prev
+                ) {
+                    State::queueStart = Time::Now;
+                }
             }
 
             if (true
