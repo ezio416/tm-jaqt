@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-22
+// m 2025-08-23
 
 class Player {
     string     accountId;
@@ -13,6 +13,10 @@ class Player {
     uint       progression  = 0;
     uint       rank         = 0;
     bool       self         = false;
+
+    bool get_canPartner() {
+        return Math::Abs(int(State::me.progression) - progression) <= 1000;
+    }
 
     Division@ get_division() {
         return GetPlayerDivision(progression, rank);
