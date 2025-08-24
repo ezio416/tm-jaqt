@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-21
+// m 2025-08-22
 
 namespace Http {
     namespace Nadeo {
@@ -216,9 +216,15 @@ namespace Http {
         Json::Value@ SendHeartbeatAsync() {
             const string funcName = "Http::Nadeo::SendHeartbeatAsync";
             const string endpoint = "/matchmaking/ranked-2v2/heartbeat";
-            const string body = '{"code":"","playWith":[]}';  // party code would go here
 
-            Json::Value@ response = PostMeetAsync(endpoint, body);
+            Json::Value@ body = Json::Object();
+            body["code"] = "";
+            body["playWith"] = Json::Array();
+            if (Partner::exists) {
+                body["playWith"].Add(Partner::partner.accountId);
+            }
+
+            Json::Value@ response = PostMeetAsync(endpoint, Json::Write(body));
             lastHeartbeat = Time::Now;
 
             Log::Debug(funcName, endpoint + " | " + Json::Write(response));
