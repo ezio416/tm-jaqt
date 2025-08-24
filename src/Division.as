@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-21
+// m 2025-08-23
 
 const vec4[] divisionColors = {
     vec4(vec3(0.45f, 0.27f, 0.13f), 1.0f),
@@ -207,6 +207,10 @@ bool GetDivisionsAsync() {
 
         for (uint i = 0; i < divisions.Length; i++) {
             divisions[i].LoadIcon("assets/" + divisions[i].position + ".png");
+        }
+
+        if (divisions.Length > 1) {
+            divisions[1].minimumPoints = 1;
         }
 
         return true;
