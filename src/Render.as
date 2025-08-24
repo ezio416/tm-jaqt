@@ -98,7 +98,7 @@ void RenderRankedContents() {
                 0.0f,
                 size: buttonSize
             )) {
-                startnew(CancelQueueAsync);
+                startnew(Http::Nadeo::CancelQueueAsync);
             }
             UI::EndDisabled();
     }
