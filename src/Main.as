@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-23
+// m 2025-08-24
 
 const string  pluginIcon = Icons::Gamepad;
 Meta::Plugin@ pluginMeta = Meta::ExecutingPlugin();
@@ -19,6 +19,9 @@ void Main() {
     @sound = Audio::LoadSample("assets/MatchFound.wav");
 
     Http::Nadeo::InitAsync();
+
+    Partner::GetFriendsAsync();
+    Partner::LoadRecent();
 
     if (!GetDivisionsAsync()) {
         Log::Error("failed to get divisions");
@@ -48,6 +51,14 @@ void OnDisabled() {
 }
 
 void OnSettingsChanged() {
+    const uint recent = S_RecentRemember;
+    S_RecentRemember = Math::Clamp(S_RecentRemember, 0, 1000);
+    if (S_RecentRemember != recent) {
+        while (Partner::recent.Length >= S_RecentRemember) {
+            Partner::recent.RemoveAt(0);
+        }
+    }
+
     S_Volume = Math::Clamp(S_Volume, 0.0f, 100.0f);
 }
 
@@ -116,6 +127,10 @@ void RenderMenuMain() {
         case State::Status::Banned:
             title += "\\$C66 (banned)";
             break;
+    }
+
+    if (Partner::exists) {
+        title += "\\$888 (with " + Partner::partner.name + ")";
     }
 
     if (UI::BeginMenu(title + "###menumain-" + pluginMeta.ID)) {

@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-23
+// m 2025-08-24
 
 uint64 lastMatchInfoRequest = 0;
 
@@ -169,25 +169,22 @@ void StartQueueAsync() {
                                 State::players.DeleteAll();
                                 State::playersArr = {};
 
-                                string[] accountIds;
-
                                 for (uint i = 0; i < App.CurrentPlayground.Players.Length; i++) {
                                     auto player = Player(cast<CSmPlayer>(App.CurrentPlayground.Players[i]));
                                     if (player.accountId.Length > 0) {
                                         State::playersArr.InsertLast(player);
                                         State::players.Set(player.accountId, @player);
-
-                                        accountIds.InsertLast(player.accountId);
+                                        Partner::AddRecent(player);
                                     }
                                 }
 
-                                Json::Value@ leaderboard = Http::Nadeo::GetLeaderboardPlayersAsync(accountIds);
+                                Json::Value@ leaderboard = Http::Nadeo::GetLeaderboardPlayersAsync(State::players.GetKeys());
                                 if (leaderboard !is null) {
                                     if (leaderboard.HasKey("results")) {
                                         Json::Value@ results = leaderboard["results"];
                                         if (true
                                             and results.GetType() == Json::Type::Array
-                                            and results.Length == accountIds.Length
+                                            and results.Length == State::playersArr.Length
                                         ) {
                                             for (uint i = 0; i < results.Length; i++) {
                                                 try {

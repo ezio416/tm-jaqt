@@ -1,10 +1,13 @@
 // c 2025-08-22
-// m 2025-08-23
+// m 2025-08-24
 
 namespace Partner {
-    Player@[] friends;
-    bool      gettingFriends = false;
-    Player@   partner;
+    Player@[]    friends;
+    bool         gettingFriends = false;
+    bool         gettingRecent  = false;
+    Player@      partner;
+    Player@[]    recent;
+    const string recentFile     = IO::FromStorageFolder("recent.json");
 
     bool get_exists() {
         return partner !is null;
@@ -12,6 +15,34 @@ namespace Partner {
 
     void Add(Player@ player) {
         @partner = player;
+    }
+
+    void AddRecent(Player@ player) {
+        const string funcName = "Partner::AddRecent";
+
+        if (false
+            or S_RecentRemember == 0
+            or player.accountId == State::me.accountId
+        ) {
+            return;
+        }
+
+        while (recent.Length >= S_RecentRemember) {
+            recent.RemoveAt(0);
+        }
+
+        for (uint i = 0; i < recent.Length; i++) {
+            if (player.accountId == recent[i].accountId) {
+                Log::Debug(funcName, "found player '" + player.name + "' at index " + i);
+                recent.RemoveAt(i);
+                break;
+            }
+        }
+
+        player.lastMatch = Time::Stamp;
+        recent.InsertLast(player);
+        Log::Debug(funcName, tostring(player));
+        SaveRecent();
     }
 
     void GetFriendsAsync() {
@@ -105,8 +136,90 @@ namespace Partner {
         gettingFriends = false;
     }
 
+    void GetRecentInfoAsync() {
+        if (gettingRecent) {
+            return;
+        }
+        gettingRecent = true;
+
+        const string funcName = "Partner::GetRecentInfoAsync";
+
+        dictionary recentById;
+        for (uint i = 0; i < recent.Length; i++) {
+            recentById.Set(recent[i].accountId, @recent[i]);
+        }
+
+        Json::Value@ req = Http::Nadeo::GetLeaderboardPlayersAsync(recentById.GetKeys());
+        if (true
+            and req !is null
+            and req.GetType() == Json::Type::Object
+            and req.HasKey("results")
+            and req["results"].GetType() == Json::Type::Array
+        ) {
+            Json::Value@ results = req["results"];
+            for (uint i = 0; i < results.Length; i++) {
+                try {
+                    Player@ player = cast<Player>(recentById[string(results[i]["player"])]);
+                    player.progression = uint(results[i]["score"]);
+                    player.rank = uint(results[i]["rank"]);
+                    Log::Debug(funcName, player.name + " | prog " + player.progression + " | rank " + player.rank);
+                } catch {
+                    Log::Error(getExceptionInfo());
+                }
+            }
+        }
+
+        dictionary@ names = NadeoServices::GetDisplayNamesAsync(recentById.GetKeys());
+        for (uint i = 0; i < recent.Length; i++) {
+            recent[i].name = string(names[recent[i].accountId]);
+        }
+
+        gettingRecent = false;
+    }
+
+    void LoadRecent() {
+        if (!IO::FileExists(recentFile)) {
+            return;
+        }
+
+        recent = {};
+
+        try {
+            Json::Value@ loaded = Json::FromFile(recentFile);
+            for (uint i = 0; i < loaded.Length; i++) {
+                recent.InsertLast(Player(loaded[i]));
+            }
+
+            Log::Info("Partner::LoadRecent", "loaded " + recent.Length + " players");
+
+            startnew(GetRecentInfoAsync);
+
+        } catch {
+            Log::Error(getExceptionInfo());
+        }
+    }
+
     void Remove() {
         @partner = null;
+    }
+
+    void SaveRecent() {
+        Json::Value@ data = Json::Array();
+
+        for (uint i = 0; i < recent.Length; i++) {
+            Json::Value@ player = Json::Object();
+            player["accountId"] = recent[i].accountId;
+            player["lastMatch"] = recent[i].lastMatch;
+            player["name"] = recent[i].name;
+            data.Add(player);
+        }
+
+        try {
+            Json::ToFile(recentFile, data, true);
+            Log::Info("Partner::SaveRecent", "saved " + recent.Length + " players");
+        } catch {
+            Log::Error(getExceptionInfo());
+        }
     }
 
     bool SortFriendsAsc(const Player@const&in a, const Player@const&in b) {

@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-08-21
+// m 2025-08-24
 
 [Setting category="General" name="Show window"]
 bool S_Enabled = true;
@@ -15,6 +15,9 @@ bool S_RankColor = true;
 
 [Setting category="General" name="Show item in top menu"]
 bool S_MenuMain = true;
+
+[Setting category="General" name="Recent players to remember" min=0 max=1000]
+uint S_RecentRemember = 100;
 
 [Setting category="General" name="Notification volume" min=0.0f max=100.0f afterrender="RenderSoundTestButton"]
 float S_Volume = 50.0f;

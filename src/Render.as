@@ -320,14 +320,12 @@ void RenderTabParty() {
                         if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
                             Partner::Remove();
                         }
-
                         UI::SetItemTooltip("Remove friend as partner");
 
                     } else if (friend.canPartner) {
                         if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
                             Partner::Add(friend);
                         }
-
                         UI::SetItemTooltip("Add friend as partner");
 
                     } else {
@@ -367,11 +365,78 @@ void RenderTabParty() {
     //     UI::EndTabItem();
     // }
 
-    // if (UI::BeginTabItem(Icons::ClockO + " Recent")) {
-    //     ;
+    if (true
+        and S_RecentRemember > 0
+        and Partner::recent.Length > 0
+        and UI::BeginTabItem(Icons::ClockO + " Recent")
+    ) {
+        UI::BeginDisabled(Partner::gettingRecent);
+        if (UI::Button(Icons::Refresh + " Refresh", vec2(UI::GetContentRegionAvail().x, scale * 25.0f))) {
+            startnew(Partner::GetRecentInfoAsync);
+        }
+        UI::EndDisabled();
 
-    //     UI::EndTabItem();
-    // }
+        if (UI::BeginTable("##table-recent", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+            UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
+
+            UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+            UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
+            UI::TableSetupColumn("time",   UI::TableColumnFlags::WidthFixed, scale * 80.0f);
+            UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+
+            UI::ListClipper clipper(Partner::recent.Length);
+            while (clipper.Step()) {
+                for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                    Player@ player = Partner::recent[i];
+
+                    UI::TableNextRow();
+
+                    UI::TableNextColumn();
+                    if (true
+                        and Partner::partner !is null
+                        and Partner::partner.accountId == player.accountId
+                    ) {
+                        if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
+                            Partner::Remove();
+                        }
+                        UI::SetItemTooltip("Remove player as partner");
+
+                    } else if (player.canPartner) {
+                        if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
+                            Partner::Add(player);
+                        }
+                        UI::SetItemTooltip("Add player as partner");
+
+                    } else {
+                        UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
+                        UI::BeginDisabled();
+                        UI::Button(Icons::UserPlus + "##" + i);
+                        UI::EndDisabled();
+                        if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
+                            UI::SetTooltip("You're too far apart!");
+                        }
+                        UI::PopStyleColor();
+                    }
+
+                    UI::TableNextColumn();
+                    UI::AlignTextToFramePadding();
+                    UI::Text(player.name.Length > 0 ? player.name : player.accountId);
+
+                    UI::TableNextColumn();
+                    UI::AlignTextToFramePadding();
+                    UI::Text(Time::FormatString(Time::Stamp - player.lastMatch >= 86400 ? "%F" : "%T", player.lastMatch));
+
+                    UI::TableNextColumn();
+                    player.division.RenderIcon(UI::GetScale() * 24.0f, true);
+                }
+            }
+
+            UI::PopStyleColor();
+            UI::EndTable();
+        }
+
+        UI::EndTabItem();
+    }
 
     UI::EndTabBar();
 

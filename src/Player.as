@@ -1,11 +1,12 @@
 // c 2025-07-02
-// m 2025-08-23
+// m 2025-08-24
 
 class Player {
     string     accountId;
     bool       frozen       = false;
     bool       hasPenalty   = false;
     uint       immunityDays = 0;
+    int64      lastMatch    = 0;
     string     name;
     bool       online       = false;
     int        penalty      = 0;
@@ -59,6 +60,10 @@ class Player {
         accountId = friend.AccountId;
         name      = friend.DisplayName;
         online    = friend.Presence == "Online";
+    }
+    Player(Json::Value@ json) {
+        accountId = string(json["accountId"]);
+        lastMatch = int64(json["lastMatch"]);
     }
 
     Json::Value@ ToJson() {
