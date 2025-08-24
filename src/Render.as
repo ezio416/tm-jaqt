@@ -240,6 +240,15 @@ void RenderTabDebug() {
             UI::Text("map thumbnail URL: " + State::mapThumbnailUrl);
             UI::Text("queueStart: " + State::queueStart);
             UI::Text("status: " + tostring(State::status));
+            UI::Text("partner id: " + (Partner::exists ? Partner::partner.accountId : ""));
+
+            UI::Text("friends:");
+            const float indent = UI::GetScale() * 15.0f;
+            UI::Indent(indent);
+            for (uint i = 0; i < Partner::friends.Length; i++) {
+                UI::Text(Partner::friends[i].accountId + ": " + Partner::friends[i].name);
+            }
+            UI::Indent(-indent);
         }
 
         UI::EndChild();
