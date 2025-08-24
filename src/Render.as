@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-08-23
+// m 2025-08-24
 
 void RenderMainTabs() {
     UI::BeginTabBar("##tabbar-main");
@@ -24,6 +24,7 @@ void RenderMainTabs() {
     }
 
     RenderTabRanked();
+    RenderTabParty();
     RenderTabSettings();
 
     if (S_Debug) {
@@ -256,6 +257,124 @@ void RenderTabDebug() {
     }
 
     UI::EndTabBar();
+    UI::EndTabItem();
+}
+
+void RenderTabParty() {
+    if (!UI::BeginTabItem(Icons::Kenney::Users + " Party")) {
+        return;
+    }
+
+    const float scale = UI::GetScale();
+
+    UI::AlignTextToFramePadding();
+    UI::Text("Partner: ");
+
+    UI::SameLine();
+
+    if (Partner::exists) {
+        if (UI::ButtonColored(Icons::UserTimes, 0.0f)) {
+            Partner::Remove();
+        } else {
+            UI::SameLine();
+            UI::AlignTextToFramePadding();
+            UI::Text(Partner::partner.name);
+
+            UI::SameLine();
+            Partner::partner.division.RenderIcon(UI::GetScale() * 24.0f, true);
+        }
+
+    } else {
+        UI::Text("none");
+    }
+
+    UI::BeginTabBar("##tabs-partner");
+
+    if (UI::BeginTabItem(Icons::Kenney::UsersAlt + " Friends")) {
+        UI::BeginDisabled(Partner::gettingFriends);
+        if (UI::Button(Icons::Refresh + " Refresh", vec2(UI::GetContentRegionAvail().x, scale * 25.0f))) {
+            startnew(Partner::GetFriendsAsync);
+        }
+        UI::EndDisabled();
+
+        if (UI::BeginTable("##table-friends", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+            UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
+
+            UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+            UI::TableSetupColumn("online", UI::TableColumnFlags::WidthFixed, scale * 15.0f);
+            UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
+            UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+
+            UI::ListClipper clipper(Partner::friends.Length);
+            while (clipper.Step()) {
+                for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                    Player@ friend = Partner::friends[i];
+
+                    UI::TableNextRow();
+
+                    UI::TableNextColumn();
+                    if (true
+                        and Partner::partner !is null
+                        and Partner::partner.accountId == friend.accountId
+                    ) {
+                        if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
+                            Partner::Remove();
+                        }
+
+                        UI::SetItemTooltip("Remove friend as partner");
+
+                    } else if (friend.canPartner) {
+                        if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
+                            Partner::Add(friend);
+                        }
+
+                        UI::SetItemTooltip("Add friend as partner");
+
+                    } else {
+                        UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
+                        UI::BeginDisabled();
+                        UI::Button(Icons::UserPlus + "##" + i);
+                        UI::EndDisabled();
+                        if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
+                            UI::SetTooltip("You're too far apart!");
+                        }
+                        UI::PopStyleColor();
+                    }
+
+                    UI::TableNextColumn();
+                    UI::AlignTextToFramePadding();
+                    UI::Text((friend.online ? "\\$0C0" : "\\$666") + Icons::Circle);
+
+                    UI::TableNextColumn();
+                    UI::AlignTextToFramePadding();
+                    UI::Text(friend.name);
+
+                    UI::TableNextColumn();
+                    friend.division.RenderIcon(UI::GetScale() * 24.0f, true);
+                }
+            }
+
+            UI::PopStyleColor();
+            UI::EndTable();
+        }
+
+        UI::EndTabItem();
+    }
+
+    // if (UI::BeginTabItem(Icons::Search + " Search")) {
+    //     ;
+
+    //     UI::EndTabItem();
+    // }
+
+    // if (UI::BeginTabItem(Icons::ClockO + " Recent")) {
+    //     ;
+
+    //     UI::EndTabItem();
+    // }
+
+    UI::EndTabBar();
+
     UI::EndTabItem();
 }
 
