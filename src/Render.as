@@ -12,7 +12,6 @@ void RenderMainTabs() {
         const vec4 active = State::me.division.color * 0.8f;
         const vec4 hovered = State::me.division.color * 1.1f;
 
-        UI::PushStyleColor(UI::Col::FrameBgHovered,   hovered);
         UI::PushStyleColor(UI::Col::FrameBgActive,    active);
         UI::PushStyleColor(UI::Col::CheckMark,        State::me.division.color);
         UI::PushStyleColor(UI::Col::SliderGrab,       State::me.division.color);
@@ -34,7 +33,7 @@ void RenderMainTabs() {
     }
 
     if (color) {
-        UI::PopStyleColor(11);
+        UI::PopStyleColor(10);
     }
 
     UI::EndTabBar();
@@ -177,16 +176,41 @@ void RenderSoundTestButton() {
 
 void RenderStatusBar() {
     if (UI::BeginMenuBar()) {
-        string statusString = "\\$AAA" + tostring(State::status);
+        string text = "\\$AAA ";
+
+        switch (State::status) {
+            case State::Status::NotQueued:
+                text += "Not in Queue";
+                break;
+
+            case State::Status::WaitingForPartner:
+                text += "Waiting for Partner";
+                break;
+
+            case State::Status::MatchFound:
+                text += "Match Found";
+                break;
+
+            case State::Status::InMatch:
+                text += "In Match";
+                break;
+
+            case State::Status::MatchEnd:
+                text += "End of Match";
+                break;
+
+            default:
+                text += tostring(State::status);
+        }
 
         switch (State::status) {
             case State::Status::Queueing:
             case State::Status::WaitingForPartner:
             case State::Status::Queued:
-                statusString += "  " + Time::Format(Time::Now - State::queueStart, false);
+                text += "  " + Time::Format(Time::Now - State::queueStart, false);
         }
 
-        UI::Text(statusString);
+        UI::Text(text);
         UI::EndMenuBar();
     }
 }
@@ -403,7 +427,7 @@ void RenderTabParty() {
         } else {
             UI::SameLine();
             UI::AlignTextToFramePadding();
-            UI::Text(Partner::partner.name);
+            UI::Text(Partner::partner.name + " - " + Partner::partner.progression + " pts -");
 
             UI::SameLine();
             Partner::partner.division.RenderIcon(UI::GetScale() * 24.0f, true);
