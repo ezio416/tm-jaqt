@@ -380,10 +380,10 @@ void RenderTabParty() {
             Partner::partner.division.RenderIcon(UI::GetScale() * 24.0f, true);
         }
     } else {
-        UI::Text("none");
+        UI::Text("None");
     }
 
-    UI::Text("Note: you and your partner need to add each other!");
+    UI::Text("Note: You and your partner need to add each other!");
 
     UI::BeginTabBar("##tabs-partner");
 
@@ -504,7 +504,7 @@ void RenderTabSearch() {
 
     const float scale = UI::GetScale();
 
-    UI::Text("Note: this search only returns 50 results");
+    UI::Text("Note: This search only returns 50 results");
 
     bool changed;
     UI::SetNextItemWidth((UI::GetContentRegionAvail().x - 15.0f) / scale - scale * 25.0f);
