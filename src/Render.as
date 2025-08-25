@@ -404,6 +404,7 @@ void RenderTabRanked() {
 
     if (!UI::BeginChild("##child-ranked")) {
         UI::EndChild();
+        UI::EndTabItem();
         return;
     }
 
