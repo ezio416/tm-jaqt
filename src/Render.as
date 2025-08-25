@@ -572,6 +572,7 @@ void RenderTabSettings() {
         S_HideWithOP = UI::Checkbox("Show/hide with Openplanet UI", S_HideWithOP);
         S_RankColor = UI::Checkbox("Use current rank for UI color", S_RankColor);
         S_MenuMain = UI::Checkbox("Show item in top menu", S_MenuMain);
+        S_RecentRemember = UI::SliderInt("Recent players to remember", S_RecentRemember, 0, 1000, flags: UI::SliderFlags::AlwaysClamp);
 
         S_Volume = UI::SliderFloat("Notification volume", S_Volume, 0.0f, 100.0f, flags: UI::SliderFlags::AlwaysClamp);
         RenderSoundTestButton();
