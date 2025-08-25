@@ -166,6 +166,34 @@ void RenderRankedContents() {
     }
 }
 
+void RenderPlayerAddButton(Player@ player, const int i) {
+    if (true
+        and Partner::partner !is null
+        and Partner::partner.accountId == player.accountId
+    ) {
+        if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
+            Partner::Remove();
+        }
+        UI::SetItemTooltip("Remove player as partner");
+
+    } else if (player.canPartner) {
+        if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
+            Partner::Add(player);
+        }
+        UI::SetItemTooltip("Add player as partner");
+
+    } else {
+        UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
+        UI::BeginDisabled();
+        UI::Button(Icons::UserPlus + "##" + i);
+        UI::EndDisabled();
+        if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
+            UI::SetTooltip("You're too far apart!");
+        }
+        UI::PopStyleColor();
+    }
+}
+
 void RenderPlayerRow(Player@ player) {
     UI::TableNextRow();
 
@@ -405,40 +433,16 @@ void RenderTabFriends() {
         UI::ListClipper clipper(Partner::friends.Length);
         while (clipper.Step()) {
             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                Player@ friend = Partner::friends[i];
+                Player@ player = Partner::friends[i];
 
                 UI::TableNextRow();
 
                 UI::TableNextColumn();
-                if (true
-                    and Partner::partner !is null
-                    and Partner::partner.accountId == friend.accountId
-                ) {
-                    if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
-                        Partner::Remove();
-                    }
-                    UI::SetItemTooltip("Remove friend as partner");
-
-                } else if (friend.canPartner) {
-                    if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
-                        Partner::Add(friend);
-                    }
-                    UI::SetItemTooltip("Add friend as partner");
-
-                } else {
-                    UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
-                    UI::BeginDisabled();
-                    UI::Button(Icons::UserPlus + "##" + i);
-                    UI::EndDisabled();
-                    if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
-                        UI::SetTooltip("You're too far apart!");
-                    }
-                    UI::PopStyleColor();
-                }
+                RenderPlayerAddButton(player, i);
 
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
-                switch (friend.status) {
+                switch (player.status) {
                     case FriendStatus::Online:
                         UI::Text("\\$0C0" + Icons::Circle);
                         UI::SetItemTooltip("Online");
@@ -462,14 +466,14 @@ void RenderTabFriends() {
 
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
-                UI::Text(friend.name);
+                UI::Text(player.name);
 
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
-                UI::Text(tostring(friend.progression) + " pts");
+                UI::Text(tostring(player.progression) + " pts");
 
                 UI::TableNextColumn();
-                friend.division.RenderIcon(UI::GetScale() * 24.0f, true);
+                player.division.RenderIcon(scale * 24.0f, true);
             }
         }
 
@@ -574,31 +578,7 @@ void RenderTabRecent() {
                 UI::TableNextRow();
 
                 UI::TableNextColumn();
-                if (true
-                    and Partner::partner !is null
-                    and Partner::partner.accountId == player.accountId
-                ) {
-                    if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
-                        Partner::Remove();
-                    }
-                    UI::SetItemTooltip("Remove player as partner");
-
-                } else if (player.canPartner) {
-                    if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
-                        Partner::Add(player);
-                    }
-                    UI::SetItemTooltip("Add player as partner");
-
-                } else {
-                    UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
-                    UI::BeginDisabled();
-                    UI::Button(Icons::UserPlus + "##" + i);
-                    UI::EndDisabled();
-                    if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
-                        UI::SetTooltip("You're too far apart!");
-                    }
-                    UI::PopStyleColor();
-                }
+                RenderPlayerAddButton(player, i);
 
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
@@ -613,7 +593,7 @@ void RenderTabRecent() {
                 UI::Text(tostring(player.progression) + " pts");
 
                 UI::TableNextColumn();
-                player.division.RenderIcon(UI::GetScale() * 24.0f, true);
+                player.division.RenderIcon(scale * 24.0f, true);
             }
         }
 
@@ -678,31 +658,7 @@ void RenderTabSearch() {
                 UI::TableNextRow();
 
                 UI::TableNextColumn();
-                if (true
-                    and Partner::partner !is null
-                    and Partner::partner.accountId == player.accountId
-                ) {
-                    if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
-                        Partner::Remove();
-                    }
-                    UI::SetItemTooltip("Remove player as partner");
-
-                } else if (player.canPartner) {
-                    if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
-                        Partner::Add(player);
-                    }
-                    UI::SetItemTooltip("Add player as partner");
-
-                } else {
-                    UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
-                    UI::BeginDisabled();
-                    UI::Button(Icons::UserPlus + "##" + i);
-                    UI::EndDisabled();
-                    if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
-                        UI::SetTooltip("You're too far apart!");
-                    }
-                    UI::PopStyleColor();
-                }
+                RenderPlayerAddButton(player, i);
 
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
@@ -713,7 +669,7 @@ void RenderTabSearch() {
                 UI::Text(tostring(player.progression) + " pts");
 
                 UI::TableNextColumn();
-                player.division.RenderIcon(UI::GetScale() * 24.0f, true);
+                player.division.RenderIcon(scale * 24.0f, true);
             }
         }
 
