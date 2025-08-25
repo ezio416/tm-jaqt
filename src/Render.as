@@ -32,6 +32,10 @@ void RenderMainTabs() {
         RenderTabDebug();
     }
 
+#if SIG_DEVELOPER
+    RenderTabDev();
+#endif
+
     if (color) {
         UI::PopStyleColor(10);
     }
@@ -85,6 +89,19 @@ void RenderRankedContents() {
             )) {
                 startnew(StartQueueAsync);
             }
+            break;
+
+        case State::Status::MatchFound:
+        case State::Status::Joining:
+            UI::BeginDisabled();
+            UI::Button(Icons::ClockO + " Joining Match", buttonSize);
+            UI::EndDisabled();
+            break;
+
+        case State::Status::InMatch:
+            UI::BeginDisabled();
+            UI::Button(Icons::Kenney::SignIn + " In Match", buttonSize );
+            UI::EndDisabled();
             break;
 
         case State::Status::Banned:
@@ -306,8 +323,60 @@ void RenderTabDebug() {
     UI::EndTabItem();
 }
 
+void RenderTabDev() {
+    if (!UI::BeginTabItem(Icons::Code + " Dev")) {
+        return;
+    }
+
+    if (!UI::BeginChild("##child-dev")) {
+        UI::EndChild();
+        UI::EndTabItem();
+        return;
+    }
+
+    UI::PushFont(UI::Font::DefaultBold, 26.0f);
+    UI::TextWrapped("Since you're in developer mode, I assume you know what you're doing!");
+    UI::PopFont();
+
+    UI::SeparatorText("Me");
+
+    if (UI::Button("Get My Status")) {
+        startnew(GetMyStatusAsync);
+    }
+
+    State::me.progression = Math::Clamp(
+        UI::InputInt("Progression", State::me.progression),
+        0,
+        10000
+    );
+
+    State::me.rank = Math::Clamp(
+        UI::InputInt("Rank", State::me.rank),
+        0,
+        1000000
+    );
+
+    State::me.hasPenalty = UI::Checkbox("Penalty", State::me.hasPenalty);
+
+    UI::SeparatorText("Other");
+
+    if (UI::BeginCombo("Status", tostring(State::status), UI::ComboFlags::HeightLargest)) {
+        for (uint i = 0; i < State::Status::_Count; i++) {
+            State::Status status = State::Status(i);
+            if (UI::Selectable(tostring(status), State::status == status)) {
+                State::status = status;
+            }
+        }
+
+        UI::EndCombo();
+    }
+
+    UI::EndChild();
+    UI::EndTabItem();
+}
+
 void RenderTabFriends() {
-    if (!UI::BeginTabItem(Icons::Kenney::UsersAlt + " Friends")) {
+    if (!UI::BeginTabItem(Icons::Users + " Friends")) {
         return;
     }
 

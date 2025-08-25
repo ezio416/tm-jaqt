@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-08-22
+// m 2025-08-24
 
 namespace State {
     uint         activePlayers = 0;
@@ -24,7 +24,8 @@ namespace State {
         Joining,
         InMatch,
         MatchEnd,
-        Banned
+        Banned,
+        _Count
     }
 
     void SetStatus(const Status s) {
