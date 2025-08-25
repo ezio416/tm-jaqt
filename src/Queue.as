@@ -15,7 +15,7 @@ void StartQueueAsync() {
     }
 
     State::SetStatus(SimpleRanked::Status::Queueing);
-    State::queueStart = Time::Now;
+    State::queueStart = Time::Stamp;
 
     while (false
         or State::status == SimpleRanked::Status::Queueing
@@ -68,7 +68,7 @@ void StartQueueAsync() {
                     and prev == SimpleRanked::Status::WaitingForPartner
                     and State::status != prev
                 ) {
-                    State::queueStart = Time::Now;
+                    State::queueStart = Time::Stamp;
                 }
             }
 

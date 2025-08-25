@@ -12,7 +12,7 @@ namespace State {
     Player               me;
     dictionary           players;
     Player@[]            playersArr;
-    uint64               queueStart    = 0;
+    int64                queueStart    = 0;
     SimpleRanked::Status status        = SimpleRanked::Status::NotQueued;
 
     void SetStatus(const SimpleRanked::Status s) {

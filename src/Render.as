@@ -252,7 +252,7 @@ void RenderStatusBar() {
             case SimpleRanked::Status::Queueing:
             case SimpleRanked::Status::WaitingForPartner:
             case SimpleRanked::Status::Queued:
-                text += "  " + Time::Format(Time::Now - State::queueStart, false);
+                text += "  " + Time::Format((Time::Stamp - State::queueStart) * 1000, false);
         }
 
         UI::Text(text);

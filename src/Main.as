@@ -110,7 +110,7 @@ void RenderMenuMain() {
 
         case SimpleRanked::Status::Queueing:
         case SimpleRanked::Status::Queued:
-            title += "\\$6C6 (queued for " + Time::Format(Time::Now - State::queueStart, false) + ")";
+            title += "\\$6C6 (queued for " + Time::Format((Time::Stamp - State::queueStart) * 1000, false) + ")";
             break;
 
         case SimpleRanked::Status::MatchFound:
