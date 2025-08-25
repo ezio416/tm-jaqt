@@ -102,7 +102,7 @@ void RenderMenuMain() {
             break;
 
         case State::Status::WaitingForPartner:
-            title += "\\6C6 (waiting for partner)";
+            title += "\\$6C6 (waiting for partner)";
             break;
 
         case State::Status::Queueing:
