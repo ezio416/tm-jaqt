@@ -61,9 +61,14 @@ class Player {
         name      = friend.DisplayName;
         online    = friend.Presence == "Online";
     }
-    Player(Json::Value@ json) {
-        accountId = string(json["accountId"]);
-        lastMatch = int64(json["lastMatch"]);
+    Player(Json::Value@ json, const bool recent = true) {
+        if (recent) {
+            accountId = string(json["accountId"]);
+            lastMatch = int64(json["lastMatch"]);
+        } else {  // tmio search
+            accountId = string(json["id"]);
+            name      = string(json["name"]);
+        }
     }
 
     Json::Value@ ToJson() {

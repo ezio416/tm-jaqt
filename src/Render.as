@@ -1,6 +1,8 @@
 // c 2025-07-03
 // m 2025-08-24
 
+const vec4 rowBgColor = vec4(vec3(), 0.5f);
+
 void RenderMainTabs() {
     UI::BeginTabBar("##tabbar-main");
 
@@ -294,6 +296,8 @@ void RenderTabParty() {
         UI::Text("none");
     }
 
+    UI::Text("Note: you and your partner need to add each other!");
+
     UI::BeginTabBar("##tabs-partner");
 
     if (UI::BeginTabItem(Icons::Kenney::UsersAlt + " Friends")) {
@@ -309,7 +313,7 @@ void RenderTabParty() {
         UI::EndDisabled();
 
         if (UI::BeginTable("##table-friends", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
-            UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
+            UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
 
             UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
             UI::TableSetupColumn("online", UI::TableColumnFlags::WidthFixed, scale * 15.0f);
@@ -387,7 +391,7 @@ void RenderTabParty() {
         UI::EndDisabled();
 
         if (UI::BeginTable("##table-recent", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
-            UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(vec3(), 0.5f));
+            UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
 
             UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
             UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
@@ -448,11 +452,94 @@ void RenderTabParty() {
         UI::EndTabItem();
     }
 
-    // if (UI::BeginTabItem(Icons::Search + " Search")) {
-    //     ;
+    if (UI::BeginTabItem(Icons::Search + " Search")) {
+        UI::Text("Note: this search only returns 50 results");
 
-    //     UI::EndTabItem();
-    // }
+        bool changed;
+        UI::SetNextItemWidth((UI::GetContentRegionAvail().x - 15.0f) / scale - scale * 25.0f);
+        Http::Tmio::playerSearch = UI::InputText(
+            "##search",
+            Http::Tmio::playerSearch,
+            changed,
+            UI::InputTextFlags::EnterReturnsTrue
+        );
+
+        const bool disabled = false
+            or Partner::searching
+            or Time::Now - Http::Tmio::lastRequest < Http::Tmio::waitTime
+            or Http::Tmio::playerSearch.Length < 4
+        ;
+
+        if (disabled) {
+            changed = false;
+        }
+
+        UI::SameLine();
+        UI::BeginDisabled(disabled);
+        if (false
+            or UI::Button(Icons::Search)
+            or changed
+        ) {
+            startnew(Partner::SearchAsync);
+        }
+        UI::EndDisabled();
+
+        if (UI::BeginTable("##table-search", 3, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+            UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
+
+            UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+            UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
+            UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+
+            UI::ListClipper clipper(Partner::search.Length);
+            while (clipper.Step()) {
+                for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                    Player@ player = Partner::search[i];
+
+                    UI::TableNextRow();
+
+                    UI::TableNextColumn();
+                    if (true
+                        and Partner::partner !is null
+                        and Partner::partner.accountId == player.accountId
+                    ) {
+                        if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
+                            Partner::Remove();
+                        }
+                        UI::SetItemTooltip("Remove player as partner");
+
+                    } else if (player.canPartner) {
+                        if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
+                            Partner::Add(player);
+                        }
+                        UI::SetItemTooltip("Add player as partner");
+
+                    } else {
+                        UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
+                        UI::BeginDisabled();
+                        UI::Button(Icons::UserPlus + "##" + i);
+                        UI::EndDisabled();
+                        if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
+                            UI::SetTooltip("You're too far apart!");
+                        }
+                        UI::PopStyleColor();
+                    }
+
+                    UI::TableNextColumn();
+                    UI::AlignTextToFramePadding();
+                    UI::Text(player.name.Length > 0 ? player.name : player.accountId);
+
+                    UI::TableNextColumn();
+                    player.division.RenderIcon(UI::GetScale() * 24.0f, true);
+                }
+            }
+
+            UI::PopStyleColor();
+            UI::EndTable();
+        }
+
+        UI::EndTabItem();
+    }
 
     UI::EndTabBar();
 

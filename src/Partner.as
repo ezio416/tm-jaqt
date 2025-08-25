@@ -10,6 +10,8 @@ namespace Partner {
     Player@      partner;
     Player@[]    recent;
     const string recentFile     = IO::FromStorageFolder("recent.json");
+    Player@[]    search;
+    bool         searching      = false;
 
     bool get_exists() {
         return partner !is null;
@@ -108,7 +110,7 @@ namespace Partner {
             App.ManiaPlanetScriptAPI.UserMgr.TaskResult_Release(task.Id);
         } catch { }
 
-        friends.Sort(SortFriendsAsc);
+        friends.SortNonConst(SortPlayersAsc);
 
         dictionary friendsById;
         for (uint i = 0; i < friends.Length; i++) {
@@ -119,7 +121,6 @@ namespace Partner {
         if (true
             and req !is null
             and req.GetType() == Json::Type::Object
-            and req.HasKey("results")
             and req["results"].GetType() == Json::Type::Array
         ) {
             Json::Value@ results = req["results"];
@@ -155,7 +156,6 @@ namespace Partner {
         if (true
             and req !is null
             and req.GetType() == Json::Type::Object
-            and req.HasKey("results")
             and req["results"].GetType() == Json::Type::Array
         ) {
             Json::Value@ results = req["results"];
@@ -222,7 +222,73 @@ namespace Partner {
         }
     }
 
-    bool SortFriendsAsc(const Player@const&in a, const Player@const&in b) {
+    void SearchAsync() {
+        if (false
+            or searching
+            or Http::Tmio::playerSearch.Length < 4
+        ) {
+            return;
+        }
+        searching = true;
+
+        const string funcName = "Partner::SearchAsync";
+
+        search = {};
+
+        Json::Value@ req = Http::Tmio::GetAccountsFromSearchAsync();
+        if (false
+            or req is null
+            or req.GetType() != Json::Type::Array
+        ) {
+            Log::Error("bad response");
+            searching = false;
+            return;
+        }
+
+        dictionary searchById;
+
+        for (uint i = 0; i < req.Length; i++) {
+            if (req[i]["player"].GetType() != Json::Type::Object) {
+                Log::Warning(funcName, "bad player: " + Json::Write(req[i]));
+                continue;
+            }
+
+            try {
+                Player@ player = Player(req[i]["player"], false);
+                search.InsertLast(player);
+                searchById.Set(player.accountId, @player);
+            } catch {
+                Log::Error(getExceptionInfo());
+            }
+        }
+
+        if (search.Length > 1) {
+            search.SortNonConst(SortPlayersAsc);
+        }
+
+        @req = Http::Nadeo::GetLeaderboardPlayersAsync(searchById.GetKeys());
+        if (true
+            and req !is null
+            and req.GetType() == Json::Type::Object
+            and req["results"].GetType() == Json::Type::Array
+        ) {
+            Json::Value@ results = req["results"];
+            for (uint i = 0; i < results.Length; i++) {
+                try {
+                    Player@ player = cast<Player>(searchById[string(results[i]["player"])]);
+                    player.progression = uint(results[i]["score"]);
+                    player.rank = uint(results[i]["rank"]);
+                    Log::Debug(funcName, player.name + " | prog " + player.progression + " | rank " + player.rank);
+                } catch {
+                    Log::Error(getExceptionInfo());
+                }
+            }
+        }
+
+        searching = false;
+    }
+
+    bool SortPlayersAsc(Player@&in a, Player@&in b) {
         if (a.online != b.online) {
             return a.online;
         }

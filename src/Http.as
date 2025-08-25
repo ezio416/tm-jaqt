@@ -307,13 +307,16 @@ namespace Http {
     }
 
     namespace Tmio {
+        uint64       lastRequest   = 0;
+        string       playerSearch;
+        const uint64 waitTime      = 1500;
+
         void GetActivePlayersAsync() {
             const string funcName = "Http::Tmio::GetActivePlayersAsync";
 
-            Net::HttpRequest@ req = Net::HttpGet("https://trackmania.io/api/player/" + GetApp().LocalPlayerInfo.WebServicesUserId);
-            while (!req.Finished()) {
-                yield();
-            }
+            Net::HttpRequest@ req = Net::HttpRequest("https://trackmania.io/api/player/" + GetApp().LocalPlayerInfo.WebServicesUserId);
+            req.Method = Net::HttpMethod::Get;
+            StartRequestAsync(req);
 
             try {
                 Json::Value@ response = req.Json();
@@ -333,6 +336,45 @@ namespace Http {
             } catch {
                 Log::Error(getExceptionInfo());
             }
+        }
+
+        Json::Value@ GetAccountsFromSearchAsync() {
+            if (playerSearch.Length < 4) {
+                Log::Error("search must be at least 4 characters");
+                return null;
+            }
+
+            const string funcName = "Http::Tmio::GetAccountsFromSearchAsync";
+
+            const string endpoint = "https://trackmania.io/api/players/find?search=" + playerSearch;
+            Net::HttpRequest@ req = Net::HttpRequest(endpoint);
+            req.Method = Net::HttpMethod::Get;
+            StartRequestAsync(req);
+
+            try {
+                Json::Value@ response = req.Json();
+                Log::ResponseToFile(funcName, response);
+                return response;
+            } catch {
+                Log::Error(getExceptionInfo());
+                return null;
+            }
+        }
+
+        void StartRequestAsync(Net::HttpRequest@ req) {
+            WaitAsync();
+            req.Start();
+            while (!req.Finished()) {
+                yield();
+            }
+        }
+
+        void WaitAsync() {
+            const uint64 now = Time::Now;
+            if (now - lastRequest < waitTime) {
+                sleep(lastRequest + waitTime - now);
+            }
+            lastRequest = Time::Now;
         }
     }
 }
