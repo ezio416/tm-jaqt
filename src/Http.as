@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-22
+// m 2025-08-24
 
 namespace Http {
     namespace Nadeo {
@@ -37,26 +37,73 @@ namespace Http {
         Json::Value@ GetLeaderboardPlayersAsync(const string[]@ accountIds) {
             const string funcName = "Http::Nadeo::GetLeaderboardPlayersAsync";
 
+            const uint maxIds = 172;
+
             if (accountIds.Length == 0) {
                 Log::Warning(funcName, "accountIds empty");
                 return null;
             }
 
-            const string endpoint = "/matchmaking/ranked-2v2/leaderboard/players?players[]=" + string::Join(accountIds, "&players[]=");
-            Json::Value@ response = GetMeetAsync(endpoint);
+            if (accountIds.Length <= maxIds) {
+                const string endpoint = "/matchmaking/ranked-2v2/leaderboard/players?players[]=" + string::Join(accountIds, "&players[]=");
+                Json::Value@ response = GetMeetAsync(endpoint);
 
-            Log::Debug(funcName, endpoint + " | " + Json::Write(response));
+                Log::Debug(funcName, endpoint + " | " + Json::Write(response));
 
-            if (response !is null) {
-                Log::ResponseToFile(funcName, response);
+                if (response !is null) {
+                    Log::ResponseToFile(funcName, response);
 
-                if (response.GetType() == Json::Type::Object) {
-                    return response;
+                    if (response.GetType() == Json::Type::Object) {
+                        return response;
+                    }
                 }
+
+                Log::Error("bad response");
+                return null;
             }
 
-            Log::Error("bad response");
-            return null;
+            Json::Value@ ret;
+            string[] ids = accountIds;
+            uint count;
+            string endpoint;
+
+            while (ids.Length > 0) {
+                count = Math::Min(ids.Length, maxIds);
+
+                string[] idsThisRequest;
+                for (uint i = 0; i < count; i++) {
+                    idsThisRequest.InsertLast(ids[i]);
+                }
+
+                endpoint = "/matchmaking/ranked-2v2/leaderboard/players?players[]=" + string::Join(idsThisRequest, "&players[]=");
+                Json::Value@ response = GetMeetAsync(endpoint);
+
+                Log::Debug(funcName, endpoint + " | " + Json::Write(response));
+
+                if (response !is null) {
+                    if (ret is null) {
+                        @ret = response;
+
+                    } else if (true
+                        and ret["results"].GetType() == Json::Type::Array
+                        and response["results"].GetType() == Json::Type::Array
+                    ) {
+                        for (uint i = 0; i < response["results"].Length; i++) {
+                            ret["results"].Add(response["results"][i]);
+                        }
+
+                    } else {
+                        Log::Warning(funcName, "problem with response results: " + Json::Write(response["results"]));
+                    }
+
+                } else {
+                    Log::Error("bad response");
+                }
+
+                ids.RemoveRange(0, count);
+            }
+
+            return ret;
         }
 
         Json::Value@ GetLiveAsync(const string&in endpoint) {
@@ -152,8 +199,6 @@ namespace Http {
         }
 
         Json::Value@ GetMeetAsync(const string&in endpoint) {
-            const string funcName = "Http::Nadeo::GetMeetAsync";
-
             Net::HttpRequest@ req = NadeoServices::Get(
                 audienceLive,
                 NadeoServices::BaseURLMeet() + "/api/" + (endpoint.StartsWith("/") ? endpoint.SubStr(1) : endpoint)
@@ -161,9 +206,10 @@ namespace Http {
             StartRequestAsync(req);
 
             try {
+                // Log::Debug("Http::Nadeo::GetMeetAsync", req.String());
                 return req.Json();
             } catch {
-                Log::Error(endpoint + " | " + getExceptionInfo());
+                Log::Error(endpoint + " | " + getExceptionInfo() + " | " + req.String());
                 return null;
             }
         }

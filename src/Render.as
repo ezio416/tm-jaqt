@@ -241,15 +241,21 @@ void RenderTabDebug() {
             UI::Text("map thumbnail URL: " + State::mapThumbnailUrl);
             UI::Text("queueStart: " + State::queueStart);
             UI::Text("status: " + tostring(State::status));
-            UI::Text("partner id: " + (Partner::exists ? Partner::partner.accountId : ""));
+            UI::TextWrapped("partner: " + (Partner::exists ? Json::Write(Partner::partner.ToJson(), true) : ""));
 
-            UI::Text("friends:");
-            const float indent = UI::GetScale() * 15.0f;
-            UI::Indent(indent);
-            for (uint i = 0; i < Partner::friends.Length; i++) {
-                UI::Text(Partner::friends[i].accountId + ": " + Partner::friends[i].name);
+            if (UI::TreeNode("friends", UI::TreeNodeFlags::Framed)) {
+                for (uint i = 0; i < Partner::friends.Length; i++) {
+                    UI::TextWrapped(Json::Write(Partner::friends[i].ToJson(), true));
+                }
+                UI::TreePop();
             }
-            UI::Indent(-indent);
+
+            if (UI::TreeNode("recent", UI::TreeNodeFlags::Framed)) {
+                for (uint i = 0; i < Partner::recent.Length; i++) {
+                    UI::TextWrapped(Json::Write(Partner::recent[i].ToJson(), true));
+                }
+                UI::TreePop();
+            }
         }
 
         UI::EndChild();
@@ -359,12 +365,6 @@ void RenderTabParty() {
         UI::EndTabItem();
     }
 
-    // if (UI::BeginTabItem(Icons::Search + " Search")) {
-    //     ;
-
-    //     UI::EndTabItem();
-    // }
-
     if (true
         and S_RecentRemember > 0
         and Partner::recent.Length > 0
@@ -437,6 +437,12 @@ void RenderTabParty() {
 
         UI::EndTabItem();
     }
+
+    // if (UI::BeginTabItem(Icons::Search + " Search")) {
+    //     ;
+
+    //     UI::EndTabItem();
+    // }
 
     UI::EndTabBar();
 
