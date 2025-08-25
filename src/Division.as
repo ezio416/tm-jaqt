@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-23
+// m 2025-08-24
 
 const vec4[] divisionColors = {
     vec4(vec3(0.45f, 0.27f, 0.13f), 1.0f),
@@ -171,7 +171,7 @@ class Division {
             and UI::IsItemHovered()
         ) {
             UI::BeginTooltip();
-            UI::Image(icon, icon.GetSize());
+            UI::Image(icon, icon.GetSize() * 0.5f);
             UI::EndTooltip();
         }
     }
