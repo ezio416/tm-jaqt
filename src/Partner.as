@@ -289,8 +289,8 @@ namespace Partner {
     }
 
     bool SortPlayersAsc(Player@&in a, Player@&in b) {
-        if (a.online != b.online) {
-            return a.online;
+        if (a.status != b.status) {
+            return a.status < b.status;
         }
 
         return a.name.ToLower() < b.name.ToLower();

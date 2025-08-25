@@ -1,19 +1,26 @@
 // c 2025-07-02
 // m 2025-08-24
 
+enum FriendStatus {
+    Online,
+    Away,
+    DoNotDisturb,
+    Offline
+}
+
 class Player {
-    string     accountId;
-    bool       frozen       = false;
-    bool       hasPenalty   = false;
-    uint       immunityDays = 0;
-    int64      lastMatch    = 0;
-    string     name;
-    bool       online       = false;
-    int        penalty      = 0;
-    CSmPlayer@ player;
-    uint       progression  = 0;
-    uint       rank         = 0;
-    bool       self         = false;
+    string       accountId;
+    bool         frozen       = false;
+    bool         hasPenalty   = false;
+    uint         immunityDays = 0;
+    int64        lastMatch    = 0;
+    string       name;
+    FriendStatus status       = FriendStatus::Offline;
+    int          penalty      = 0;
+    CSmPlayer@   player;
+    uint         progression  = 0;
+    uint         rank         = 0;
+    bool         self         = false;
 
     bool get_canPartner() {
         return Math::Abs(int(State::me.progression) - progression) <= 1000;
@@ -50,17 +57,27 @@ class Player {
     }
 
     Player() { }
+
     Player(CSmPlayer@ player) {
         accountId    = player.User.WebServicesUserId;
         name         = player.User.Name;
         @this.player = player;
         this.player.MwAddRef();
     }
+
     Player(CFriend@ friend) {
         accountId = friend.AccountId;
         name      = friend.DisplayName;
-        online    = friend.Presence == "Online";
+
+        if (friend.Presence == "Online") {
+            status = FriendStatus::Online;
+        } else if (friend.Presence == "Away") {
+            status = FriendStatus::Away;
+        } else if (friend.Presence == "DoNotDisturb") {
+            status = FriendStatus::DoNotDisturb;
+        }
     }
+
     Player(Json::Value@ json, const bool recent = true) {
         if (recent) {
             accountId = string(json["accountId"]);

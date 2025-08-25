@@ -344,7 +344,27 @@ void RenderTabFriends() {
 
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
-                UI::Text((friend.online ? "\\$0C0" : "\\$666") + Icons::Circle);
+                switch (friend.status) {
+                    case FriendStatus::Online:
+                        UI::Text("\\$0C0" + Icons::Circle);
+                        UI::SetItemTooltip("Online");
+                        break;
+
+                    case FriendStatus::Away:
+                        UI::Text("\\$CC0" + Icons::Circle);
+                        UI::SetItemTooltip("Away");
+                        break;
+
+                    case FriendStatus::DoNotDisturb:
+                        UI::Text("\\$C00" + Icons::Circle);
+                        UI::SetItemTooltip("Do Not Disturb");
+                        break;
+
+                    case FriendStatus::Offline:
+                        UI::Text("\\$666" + Icons::Circle);
+                        UI::SetItemTooltip("Offline");
+                        break;
+                }
 
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
