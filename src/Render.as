@@ -10,8 +10,9 @@ void RenderMainTabs() {
 
     if (color) {
         const vec4 active = State::me.division.color * 0.8f;
-        const vec4 hovered = State::me.division.color * 1.2f;
+        const vec4 hovered = State::me.division.color * 1.1f;
 
+        UI::PushStyleColor(UI::Col::PopupBg,          State::me.division.color * vec4(vec3(0.5f), 1.0f));
         UI::PushStyleColor(UI::Col::FrameBgHovered,   hovered);
         UI::PushStyleColor(UI::Col::FrameBgActive,    active);
         UI::PushStyleColor(UI::Col::CheckMark,        State::me.division.color);
@@ -34,7 +35,7 @@ void RenderMainTabs() {
     }
 
     if (color) {
-        UI::PopStyleColor(11);
+        UI::PopStyleColor(12);
     }
 
     UI::EndTabBar();
@@ -76,7 +77,10 @@ void RenderRankedContents() {
     switch (State::status) {
         case State::Status::NotQueued:
         case State::Status::MatchEnd:
-            if (UI::Button(Icons::Play + " Queue", buttonSize)) {
+            if (UI::Button(
+                Icons::Play + " Queue" + (Partner::exists ? " with " + Partner::partner.name : ""),
+                buttonSize
+            )) {
                 startnew(StartQueueAsync);
             }
             break;
@@ -163,7 +167,7 @@ void RenderPlayerRow(Player@ player) {
 }
 
 void RenderSoundTestButton() {
-    if (UI::Button(Icons::Play + " Test")) {
+    if (UI::Button(Icons::Play + " Test sound")) {
         PlaySound();
     }
 }
@@ -258,6 +262,13 @@ void RenderTabDebug() {
                 }
                 UI::TreePop();
             }
+
+            if (UI::TreeNode("search", UI::TreeNodeFlags::Framed)) {
+                for (uint i = 0; i < Partner::search.Length; i++) {
+                    UI::TextWrapped(Json::Write(Partner::search[i].ToJson(), true));
+                }
+                UI::TreePop();
+            }
         }
 
         UI::EndChild();
@@ -268,12 +279,90 @@ void RenderTabDebug() {
     UI::EndTabItem();
 }
 
-void RenderTabParty() {
-    if (!UI::BeginTabItem(Icons::Kenney::Users + " Party")) {
+void RenderTabFriends() {
+    if (!UI::BeginTabItem(Icons::Kenney::UsersAlt + " Friends")) {
         return;
     }
 
     const float scale = UI::GetScale();
+
+    if (!Partner::gotFriends) {
+        Partner::gotFriends = true;
+        startnew(Partner::GetFriendsAsync);
+    }
+
+    UI::BeginDisabled(Partner::gettingFriends);
+    if (UI::Button(Icons::Refresh + " Refresh", vec2(UI::GetContentRegionAvail().x, scale * 25.0f))) {
+        startnew(Partner::GetFriendsAsync);
+    }
+    UI::EndDisabled();
+
+    if (UI::BeginTable("##table-friends", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+        UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
+
+        UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+        UI::TableSetupColumn("online", UI::TableColumnFlags::WidthFixed, scale * 15.0f);
+        UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
+        UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+
+        UI::ListClipper clipper(Partner::friends.Length);
+        while (clipper.Step()) {
+            for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                Player@ friend = Partner::friends[i];
+
+                UI::TableNextRow();
+
+                UI::TableNextColumn();
+                if (true
+                    and Partner::partner !is null
+                    and Partner::partner.accountId == friend.accountId
+                ) {
+                    if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
+                        Partner::Remove();
+                    }
+                    UI::SetItemTooltip("Remove friend as partner");
+
+                } else if (friend.canPartner) {
+                    if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
+                        Partner::Add(friend);
+                    }
+                    UI::SetItemTooltip("Add friend as partner");
+
+                } else {
+                    UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
+                    UI::BeginDisabled();
+                    UI::Button(Icons::UserPlus + "##" + i);
+                    UI::EndDisabled();
+                    if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
+                        UI::SetTooltip("You're too far apart!");
+                    }
+                    UI::PopStyleColor();
+                }
+
+                UI::TableNextColumn();
+                UI::AlignTextToFramePadding();
+                UI::Text((friend.online ? "\\$0C0" : "\\$666") + Icons::Circle);
+
+                UI::TableNextColumn();
+                UI::AlignTextToFramePadding();
+                UI::Text(friend.name);
+
+                UI::TableNextColumn();
+                friend.division.RenderIcon(UI::GetScale() * 24.0f, true);
+            }
+        }
+
+        UI::PopStyleColor();
+        UI::EndTable();
+    }
+
+    UI::EndTabItem();
+}
+
+void RenderTabParty() {
+    if (!UI::BeginTabItem(Icons::Kenney::Users + " Party")) {
+        return;
+    }
 
     UI::AlignTextToFramePadding();
     UI::Text("Partner: ");
@@ -291,7 +380,6 @@ void RenderTabParty() {
             UI::SameLine();
             Partner::partner.division.RenderIcon(UI::GetScale() * 24.0f, true);
         }
-
     } else {
         UI::Text("none");
     }
@@ -300,246 +388,9 @@ void RenderTabParty() {
 
     UI::BeginTabBar("##tabs-partner");
 
-    if (UI::BeginTabItem(Icons::Kenney::UsersAlt + " Friends")) {
-        if (!Partner::gotFriends) {
-            Partner::gotFriends = true;
-            startnew(Partner::GetFriendsAsync);
-        }
-
-        UI::BeginDisabled(Partner::gettingFriends);
-        if (UI::Button(Icons::Refresh + " Refresh", vec2(UI::GetContentRegionAvail().x, scale * 25.0f))) {
-            startnew(Partner::GetFriendsAsync);
-        }
-        UI::EndDisabled();
-
-        if (UI::BeginTable("##table-friends", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
-            UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
-
-            UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
-            UI::TableSetupColumn("online", UI::TableColumnFlags::WidthFixed, scale * 15.0f);
-            UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
-            UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
-
-            UI::ListClipper clipper(Partner::friends.Length);
-            while (clipper.Step()) {
-                for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                    Player@ friend = Partner::friends[i];
-
-                    UI::TableNextRow();
-
-                    UI::TableNextColumn();
-                    if (true
-                        and Partner::partner !is null
-                        and Partner::partner.accountId == friend.accountId
-                    ) {
-                        if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
-                            Partner::Remove();
-                        }
-                        UI::SetItemTooltip("Remove friend as partner");
-
-                    } else if (friend.canPartner) {
-                        if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
-                            Partner::Add(friend);
-                        }
-                        UI::SetItemTooltip("Add friend as partner");
-
-                    } else {
-                        UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
-                        UI::BeginDisabled();
-                        UI::Button(Icons::UserPlus + "##" + i);
-                        UI::EndDisabled();
-                        if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
-                            UI::SetTooltip("You're too far apart!");
-                        }
-                        UI::PopStyleColor();
-                    }
-
-                    UI::TableNextColumn();
-                    UI::AlignTextToFramePadding();
-                    UI::Text((friend.online ? "\\$0C0" : "\\$666") + Icons::Circle);
-
-                    UI::TableNextColumn();
-                    UI::AlignTextToFramePadding();
-                    UI::Text(friend.name);
-
-                    UI::TableNextColumn();
-                    friend.division.RenderIcon(UI::GetScale() * 24.0f, true);
-                }
-            }
-
-            UI::PopStyleColor();
-            UI::EndTable();
-        }
-
-        UI::EndTabItem();
-    }
-
-    if (true
-        and S_RecentRemember > 0
-        and Partner::recent.Length > 0
-        and UI::BeginTabItem(Icons::ClockO + " Recent")
-    ) {
-        if (!Partner::gotRecent) {
-            Partner::gotRecent = true;
-            startnew(Partner::GetRecentInfoAsync);
-        }
-
-        UI::BeginDisabled(Partner::gettingRecent);
-        if (UI::Button(Icons::Refresh + " Refresh", vec2(UI::GetContentRegionAvail().x, scale * 25.0f))) {
-            startnew(Partner::GetRecentInfoAsync);
-        }
-        UI::EndDisabled();
-
-        if (UI::BeginTable("##table-recent", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
-            UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
-
-            UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
-            UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
-            UI::TableSetupColumn("time",   UI::TableColumnFlags::WidthFixed, scale * 80.0f);
-            UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
-
-            UI::ListClipper clipper(Partner::recent.Length);
-            while (clipper.Step()) {
-                for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                    Player@ player = Partner::recent[i];
-
-                    UI::TableNextRow();
-
-                    UI::TableNextColumn();
-                    if (true
-                        and Partner::partner !is null
-                        and Partner::partner.accountId == player.accountId
-                    ) {
-                        if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
-                            Partner::Remove();
-                        }
-                        UI::SetItemTooltip("Remove player as partner");
-
-                    } else if (player.canPartner) {
-                        if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
-                            Partner::Add(player);
-                        }
-                        UI::SetItemTooltip("Add player as partner");
-
-                    } else {
-                        UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
-                        UI::BeginDisabled();
-                        UI::Button(Icons::UserPlus + "##" + i);
-                        UI::EndDisabled();
-                        if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
-                            UI::SetTooltip("You're too far apart!");
-                        }
-                        UI::PopStyleColor();
-                    }
-
-                    UI::TableNextColumn();
-                    UI::AlignTextToFramePadding();
-                    UI::Text(player.name.Length > 0 ? player.name : player.accountId);
-
-                    UI::TableNextColumn();
-                    UI::AlignTextToFramePadding();
-                    UI::Text(Time::FormatString(Time::Stamp - player.lastMatch >= 86400 ? "%F" : "%T", player.lastMatch));
-
-                    UI::TableNextColumn();
-                    player.division.RenderIcon(UI::GetScale() * 24.0f, true);
-                }
-            }
-
-            UI::PopStyleColor();
-            UI::EndTable();
-        }
-
-        UI::EndTabItem();
-    }
-
-    if (UI::BeginTabItem(Icons::Search + " Search")) {
-        UI::Text("Note: this search only returns 50 results");
-
-        bool changed;
-        UI::SetNextItemWidth((UI::GetContentRegionAvail().x - 15.0f) / scale - scale * 25.0f);
-        Http::Tmio::playerSearch = UI::InputText(
-            "##search",
-            Http::Tmio::playerSearch,
-            changed,
-            UI::InputTextFlags::EnterReturnsTrue
-        );
-
-        const bool disabled = false
-            or Partner::searching
-            or Time::Now - Http::Tmio::lastRequest < Http::Tmio::waitTime
-            or Http::Tmio::playerSearch.Length < 4
-        ;
-
-        if (disabled) {
-            changed = false;
-        }
-
-        UI::SameLine();
-        UI::BeginDisabled(disabled);
-        if (false
-            or UI::Button(Icons::Search)
-            or changed
-        ) {
-            startnew(Partner::SearchAsync);
-        }
-        UI::EndDisabled();
-
-        if (UI::BeginTable("##table-search", 3, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
-            UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
-
-            UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
-            UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
-            UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
-
-            UI::ListClipper clipper(Partner::search.Length);
-            while (clipper.Step()) {
-                for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                    Player@ player = Partner::search[i];
-
-                    UI::TableNextRow();
-
-                    UI::TableNextColumn();
-                    if (true
-                        and Partner::partner !is null
-                        and Partner::partner.accountId == player.accountId
-                    ) {
-                        if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
-                            Partner::Remove();
-                        }
-                        UI::SetItemTooltip("Remove player as partner");
-
-                    } else if (player.canPartner) {
-                        if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
-                            Partner::Add(player);
-                        }
-                        UI::SetItemTooltip("Add player as partner");
-
-                    } else {
-                        UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
-                        UI::BeginDisabled();
-                        UI::Button(Icons::UserPlus + "##" + i);
-                        UI::EndDisabled();
-                        if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
-                            UI::SetTooltip("You're too far apart!");
-                        }
-                        UI::PopStyleColor();
-                    }
-
-                    UI::TableNextColumn();
-                    UI::AlignTextToFramePadding();
-                    UI::Text(player.name.Length > 0 ? player.name : player.accountId);
-
-                    UI::TableNextColumn();
-                    player.division.RenderIcon(UI::GetScale() * 24.0f, true);
-                }
-            }
-
-            UI::PopStyleColor();
-            UI::EndTable();
-        }
-
-        UI::EndTabItem();
-    }
+    RenderTabFriends();
+    RenderTabRecent();
+    RenderTabSearch();
 
     UI::EndTabBar();
 
@@ -562,12 +413,200 @@ void RenderTabRanked() {
     UI::EndTabItem();
 }
 
+void RenderTabRecent() {
+    if (false
+        or S_RecentRemember == 0
+        or Partner::recent.Length == 0
+        or !UI::BeginTabItem(Icons::ClockO + " Recent")
+    ) {
+        return;
+    }
+
+    const float scale = UI::GetScale();
+
+    if (!Partner::gotRecent) {
+        Partner::gotRecent = true;
+        startnew(Partner::GetRecentInfoAsync);
+    }
+
+    UI::BeginDisabled(Partner::gettingRecent);
+    if (UI::Button(Icons::Refresh + " Refresh", vec2(UI::GetContentRegionAvail().x, scale * 25.0f))) {
+        startnew(Partner::GetRecentInfoAsync);
+    }
+    UI::EndDisabled();
+
+    if (UI::BeginTable("##table-recent", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+        UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
+
+        UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+        UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
+        UI::TableSetupColumn("time",   UI::TableColumnFlags::WidthFixed, scale * 80.0f);
+        UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+
+        UI::ListClipper clipper(Partner::recent.Length);
+        while (clipper.Step()) {
+            for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                Player@ player = Partner::recent[i];
+
+                UI::TableNextRow();
+
+                UI::TableNextColumn();
+                if (true
+                    and Partner::partner !is null
+                    and Partner::partner.accountId == player.accountId
+                ) {
+                    if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
+                        Partner::Remove();
+                    }
+                    UI::SetItemTooltip("Remove player as partner");
+
+                } else if (player.canPartner) {
+                    if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
+                        Partner::Add(player);
+                    }
+                    UI::SetItemTooltip("Add player as partner");
+
+                } else {
+                    UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
+                    UI::BeginDisabled();
+                    UI::Button(Icons::UserPlus + "##" + i);
+                    UI::EndDisabled();
+                    if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
+                        UI::SetTooltip("You're too far apart!");
+                    }
+                    UI::PopStyleColor();
+                }
+
+                UI::TableNextColumn();
+                UI::AlignTextToFramePadding();
+                UI::Text(player.name.Length > 0 ? player.name : player.accountId);
+
+                UI::TableNextColumn();
+                UI::AlignTextToFramePadding();
+                UI::Text(Time::FormatString(Time::Stamp - player.lastMatch >= 86400 ? "%F" : "%T", player.lastMatch));
+
+                UI::TableNextColumn();
+                player.division.RenderIcon(UI::GetScale() * 24.0f, true);
+            }
+        }
+
+        UI::PopStyleColor();
+        UI::EndTable();
+    }
+
+    UI::EndTabItem();
+}
+
+void RenderTabSearch() {
+    if (!UI::BeginTabItem(Icons::Search + " Search")) {
+        return;
+    }
+
+    const float scale = UI::GetScale();
+
+    UI::Text("Note: this search only returns 50 results");
+
+    bool changed;
+    UI::SetNextItemWidth((UI::GetContentRegionAvail().x - 15.0f) / scale - scale * 25.0f);
+    Http::Tmio::playerSearch = UI::InputText(
+        "##search",
+        Http::Tmio::playerSearch,
+        changed,
+        UI::InputTextFlags::EnterReturnsTrue
+    );
+
+    const bool disabled = false
+        or Partner::searching
+        or Time::Now - Http::Tmio::lastRequest < Http::Tmio::waitTime
+        or Http::Tmio::playerSearch.Length < 4
+    ;
+
+    if (disabled) {
+        changed = false;
+    }
+
+    UI::SameLine();
+    UI::BeginDisabled(disabled);
+    if (false
+        or UI::Button(Icons::Search)
+        or changed
+    ) {
+        startnew(Partner::SearchAsync);
+    }
+    UI::EndDisabled();
+
+    if (UI::BeginTable("##table-search", 3, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+        UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
+
+        UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+        UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
+        UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+
+        UI::ListClipper clipper(Partner::search.Length);
+        while (clipper.Step()) {
+            for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+                Player@ player = Partner::search[i];
+
+                UI::TableNextRow();
+
+                UI::TableNextColumn();
+                if (true
+                    and Partner::partner !is null
+                    and Partner::partner.accountId == player.accountId
+                ) {
+                    if (UI::ButtonColored(Icons::UserTimes + "##" + i, 0.0f)) {
+                        Partner::Remove();
+                    }
+                    UI::SetItemTooltip("Remove player as partner");
+
+                } else if (player.canPartner) {
+                    if (UI::ButtonColored(Icons::UserPlus + "##" + i, 0.3f)) {
+                        Partner::Add(player);
+                    }
+                    UI::SetItemTooltip("Add player as partner");
+
+                } else {
+                    UI::PushStyleColor(UI::Col::Button, vec4(vec3(0.5f), 1.0f));
+                    UI::BeginDisabled();
+                    UI::Button(Icons::UserPlus + "##" + i);
+                    UI::EndDisabled();
+                    if (UI::IsItemHovered(UI::HoveredFlags::AllowWhenDisabled)) {
+                        UI::SetTooltip("You're too far apart!");
+                    }
+                    UI::PopStyleColor();
+                }
+
+                UI::TableNextColumn();
+                UI::AlignTextToFramePadding();
+                UI::Text(player.name.Length > 0 ? player.name : player.accountId);
+
+                UI::TableNextColumn();
+                player.division.RenderIcon(UI::GetScale() * 24.0f, true);
+            }
+        }
+
+        UI::PopStyleColor();
+        UI::EndTable();
+    }
+
+    UI::EndTabItem();
+}
+
 void RenderTabSettings() {
     if (!UI::BeginTabItem(Icons::Cogs + " Settings")) {
         return;
     }
 
     if (UI::BeginChild("##child-settings")) {
+        if (UI::Button("Reset to default")) {
+            Meta::PluginSetting@[]@ settings = pluginMeta.GetSettings();
+            for (uint i = 0; i < settings.Length; i++) {
+                if (settings[i].Category == "General") {
+                    settings[i].Reset();
+                }
+            }
+        }
+
         S_HideWithGame = UI::Checkbox("Show/hide with game UI", S_HideWithGame);
         S_HideWithOP = UI::Checkbox("Show/hide with Openplanet UI", S_HideWithOP);
         S_RankColor = UI::Checkbox("Use current rank for UI color", S_RankColor);
