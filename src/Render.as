@@ -12,7 +12,6 @@ void RenderMainTabs() {
         const vec4 active = State::me.division.color * 0.8f;
         const vec4 hovered = State::me.division.color * 1.1f;
 
-        UI::PushStyleColor(UI::Col::PopupBg,          State::me.division.color * vec4(vec3(0.5f), 1.0f));
         UI::PushStyleColor(UI::Col::FrameBgHovered,   hovered);
         UI::PushStyleColor(UI::Col::FrameBgActive,    active);
         UI::PushStyleColor(UI::Col::CheckMark,        State::me.division.color);
@@ -35,7 +34,7 @@ void RenderMainTabs() {
     }
 
     if (color) {
-        UI::PopStyleColor(12);
+        UI::PopStyleColor(11);
     }
 
     UI::EndTabBar();
