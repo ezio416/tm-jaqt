@@ -501,7 +501,7 @@ void RenderTabParty() {
         } else {
             UI::SameLine();
             UI::AlignTextToFramePadding();
-            UI::Text(Partner::partner.name + " - " + Partner::partner.progression + " pts -");
+            UI::Text(Partner::partner.name + "\\$888 | \\$G" + Partner::partner.progression + " pts\\$888 |");
 
             UI::SameLine();
             Partner::partner.division.RenderIcon(UI::GetScale() * 24.0f, true);
