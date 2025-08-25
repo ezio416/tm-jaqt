@@ -5,6 +5,8 @@ namespace Partner {
     Player@[]    friends;
     bool         gettingFriends = false;
     bool         gettingRecent  = false;
+    bool         gotFriends     = false;
+    bool         gotRecent      = false;
     Player@      partner;
     Player@[]    recent;
     const string recentFile     = IO::FromStorageFolder("recent.json");
@@ -191,8 +193,6 @@ namespace Partner {
             }
 
             Log::Info("Partner::LoadRecent", "loaded " + recent.Length + " players");
-
-            startnew(GetRecentInfoAsync);
 
         } catch {
             Log::Error(getExceptionInfo());

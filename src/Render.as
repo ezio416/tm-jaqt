@@ -297,6 +297,11 @@ void RenderTabParty() {
     UI::BeginTabBar("##tabs-partner");
 
     if (UI::BeginTabItem(Icons::Kenney::UsersAlt + " Friends")) {
+        if (!Partner::gotFriends) {
+            Partner::gotFriends = true;
+            startnew(Partner::GetFriendsAsync);
+        }
+
         UI::BeginDisabled(Partner::gettingFriends);
         if (UI::Button(Icons::Refresh + " Refresh", vec2(UI::GetContentRegionAvail().x, scale * 25.0f))) {
             startnew(Partner::GetFriendsAsync);
@@ -370,6 +375,11 @@ void RenderTabParty() {
         and Partner::recent.Length > 0
         and UI::BeginTabItem(Icons::ClockO + " Recent")
     ) {
+        if (!Partner::gotRecent) {
+            Partner::gotRecent = true;
+            startnew(Partner::GetRecentInfoAsync);
+        }
+
         UI::BeginDisabled(Partner::gettingRecent);
         if (UI::Button(Icons::Refresh + " Refresh", vec2(UI::GetContentRegionAvail().x, scale * 25.0f))) {
             startnew(Partner::GetRecentInfoAsync);

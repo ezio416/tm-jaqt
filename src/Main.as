@@ -20,7 +20,6 @@ void Main() {
 
     Http::Nadeo::InitAsync();
 
-    Partner::GetFriendsAsync();
     Partner::LoadRecent();
 
     if (!GetDivisionsAsync()) {
