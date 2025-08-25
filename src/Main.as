@@ -78,7 +78,11 @@ void Render() {
 
     UI::SetNextWindowSize(300, 300, UI::Cond::FirstUseEver);
 
-    if (UI::Begin(pluginTitle + "###main-" + pluginMeta.ID, S_Enabled, UI::WindowFlags::MenuBar)) {
+    if (UI::Begin(
+        pluginTitle + "\\$666 v" + pluginMeta.Version + "###main-" + pluginMeta.ID,
+        S_Enabled,
+        UI::WindowFlags::MenuBar
+    )) {
         RenderStatusBar();
         RenderMainTabs();
     }
