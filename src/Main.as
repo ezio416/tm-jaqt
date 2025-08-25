@@ -12,7 +12,6 @@ string get_pluginTitle() {
     return pluginColor + pluginIcon + "\\$G " + pluginMeta.Name;
 }
 
-Division@[]    divisions = { Division() };
 Audio::Sample@ sound;
 
 void Main() {
