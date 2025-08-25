@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-08-24
+// m 2025-08-25
 
 const vec4 rowBgColor = vec4(vec3(), 0.5f);
 
@@ -81,8 +81,8 @@ void RenderRankedContents() {
     UI::PushFont(UI::Font::DefaultBold, 24.0f);
 
     switch (State::status) {
-        case State::Status::NotQueued:
-        case State::Status::MatchEnd:
+        case SimpleRanked::Status::NotQueued:
+        case SimpleRanked::Status::MatchEnd:
             if (UI::Button(
                 Icons::Play + " Queue" + (Partner::exists ? " with " + Partner::partner.name : ""),
                 buttonSize
@@ -91,20 +91,20 @@ void RenderRankedContents() {
             }
             break;
 
-        case State::Status::MatchFound:
-        case State::Status::Joining:
+        case SimpleRanked::Status::MatchFound:
+        case SimpleRanked::Status::Joining:
             UI::BeginDisabled();
             UI::Button(Icons::ClockO + " Joining Match", buttonSize);
             UI::EndDisabled();
             break;
 
-        case State::Status::InMatch:
+        case SimpleRanked::Status::InMatch:
             UI::BeginDisabled();
             UI::Button(Icons::Kenney::SignIn + " In Match", buttonSize );
             UI::EndDisabled();
             break;
 
-        case State::Status::Banned:
+        case SimpleRanked::Status::Banned:
             UI::BeginDisabled();
             UI::Button(Icons::Ban + " Banned", buttonSize);
             UI::EndDisabled();
@@ -114,9 +114,9 @@ void RenderRankedContents() {
             UI::BeginDisabled(false
                 or State::cancel
                 or (true
-                    and State::status != State::Status::Queueing
-                    and State::status != State::Status::WaitingForPartner
-                    and State::status != State::Status::Queued
+                    and State::status != SimpleRanked::Status::Queueing
+                    and State::status != SimpleRanked::Status::WaitingForPartner
+                    and State::status != SimpleRanked::Status::Queued
                 )
             );
             if (UI::ButtonColored(
@@ -136,8 +136,8 @@ void RenderRankedContents() {
     }
 
     if (false
-        or State::status == State::Status::InMatch
-        or State::status == State::Status::MatchEnd
+        or State::status == SimpleRanked::Status::InMatch
+        or State::status == SimpleRanked::Status::MatchEnd
     ) {
         Player@ player;
 
@@ -224,23 +224,23 @@ void RenderStatusBar() {
         string text = "\\$AAA ";
 
         switch (State::status) {
-            case State::Status::NotQueued:
+            case SimpleRanked::Status::NotQueued:
                 text += "Not in Queue";
                 break;
 
-            case State::Status::WaitingForPartner:
+            case SimpleRanked::Status::WaitingForPartner:
                 text += "Waiting for Partner";
                 break;
 
-            case State::Status::MatchFound:
+            case SimpleRanked::Status::MatchFound:
                 text += "Match Found";
                 break;
 
-            case State::Status::InMatch:
+            case SimpleRanked::Status::InMatch:
                 text += "In Match";
                 break;
 
-            case State::Status::MatchEnd:
+            case SimpleRanked::Status::MatchEnd:
                 text += "End of Match";
                 break;
 
@@ -249,9 +249,9 @@ void RenderStatusBar() {
         }
 
         switch (State::status) {
-            case State::Status::Queueing:
-            case State::Status::WaitingForPartner:
-            case State::Status::Queued:
+            case SimpleRanked::Status::Queueing:
+            case SimpleRanked::Status::WaitingForPartner:
+            case SimpleRanked::Status::Queued:
                 text += "  " + Time::Format(Time::Now - State::queueStart, false);
         }
 
@@ -389,8 +389,9 @@ void RenderTabDev() {
     UI::SeparatorText("Other");
 
     if (UI::BeginCombo("Status", tostring(State::status), UI::ComboFlags::HeightLargest)) {
-        for (uint i = 0; i < State::Status::_Count; i++) {
-            State::Status status = State::Status(i);
+        SimpleRanked::Status status;
+        for (uint i = 0; i < SimpleRanked::Status::_Count; i++) {
+            status = SimpleRanked::Status(i);
             if (UI::Selectable(tostring(status), State::status == status)) {
                 State::status = status;
             }

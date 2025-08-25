@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-24
+// m 2025-08-25
 
 const string  pluginIcon = Icons::Gamepad;
 Meta::Plugin@ pluginMeta = Meta::ExecutingPlugin();
@@ -36,9 +36,9 @@ void OnDestroyed() {
 
 void OnDisabled() {
     switch (State::status) {
-        case State::Status::Queueing:
-        case State::Status::WaitingForPartner:
-        case State::Status::Queued:
+        case SimpleRanked::Status::Queueing:
+        case SimpleRanked::Status::WaitingForPartner:
+        case SimpleRanked::Status::Queued:
             Log::Warning("OnDisabled", "canceling queue");
 
             NadeoServices::Post(
@@ -101,32 +101,32 @@ void RenderMenuMain() {
 
     string title = pluginColor + pluginIcon + "\\$G Ranked";
     switch (State::status) {
-        case State::Status::NotQueued:
+        case SimpleRanked::Status::NotQueued:
             break;
 
-        case State::Status::WaitingForPartner:
+        case SimpleRanked::Status::WaitingForPartner:
             title += "\\$6C6 (waiting for partner)";
             break;
 
-        case State::Status::Queueing:
-        case State::Status::Queued:
+        case SimpleRanked::Status::Queueing:
+        case SimpleRanked::Status::Queued:
             title += "\\$6C6 (queued for " + Time::Format(Time::Now - State::queueStart, false) + ")";
             break;
 
-        case State::Status::MatchFound:
-        case State::Status::Joining:
+        case SimpleRanked::Status::MatchFound:
+        case SimpleRanked::Status::Joining:
             title += "\\$6CC (match found)";
             break;
 
-        case State::Status::InMatch:
+        case SimpleRanked::Status::InMatch:
             title += "\\$6CC (in match)";
             break;
 
-        case State::Status::MatchEnd:
+        case SimpleRanked::Status::MatchEnd:
             title += "\\$66C (match end)";
             break;
 
-        case State::Status::Banned:
+        case SimpleRanked::Status::Banned:
             title += "\\$C66 (banned)";
             break;
     }
