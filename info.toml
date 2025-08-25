@@ -2,7 +2,7 @@
 name = "Simple Ranked"
 author = "Ezio"
 category = "Matchmaking"
-version = "0.1.1"
+version = "0.1.2"
 siteid = 758
 
 [script]
