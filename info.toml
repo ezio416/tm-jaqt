@@ -7,5 +7,7 @@ siteid = 758
 
 [script]
 dependencies = [ "NadeoServices" ]
+export_dependencies = [ "NadeoServices" ]
 exports = [ "src/Export.as" ]
+module = "SimpleRanked"
 shared_exports = [ "src/ExportShared" ]
