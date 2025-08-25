@@ -677,6 +677,8 @@ void RenderTabRecent() {
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
                 UI::Text(Time::FormatString(Time::Stamp - player.lastMatch >= 86400 ? "%F" : "%T", player.lastMatch));
+                UI::SetItemTooltip(Time::FormatString("%F %T", player.lastMatch) + "\n"
+                    + Time::Format((Time::Stamp - player.lastMatch) * 1000, false) + " ago");
 
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
