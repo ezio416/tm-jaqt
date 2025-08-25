@@ -3,9 +3,9 @@
 
 # Simple Ranked
 
-2v2.
+Queue for 2v2.
 
-Inspired by AFK Queue Tool.
+Inspired by AFK Queue Tool and works if your partner is using that plugin instead.
 
 <!-- ![Signed](https://img.shields.io/badge/Signed-Yes-00AA00) -->
 <!-- ![Signed](https://img.shields.io/badge/Signed-School_Mode-CC1199) -->
