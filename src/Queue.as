@@ -88,7 +88,7 @@ void StartQueueAsync() {
                         and State::mapName.Length == 0
                         and State::match.mapUid.Length > 0
                     ) {
-                        Json::Value@ mapInfo = Http::Nadeo::GetMapInfo(State::match.mapUid);
+                        Json::Value@ mapInfo = Http::Nadeo::GetMapInfoAsync(State::match.mapUid);
                         if (mapInfo !is null) {
                             if (true
                                 and mapInfo.HasKey("name")

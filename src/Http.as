@@ -125,8 +125,8 @@ namespace Http {
             }
         }
 
-        Json::Value@ GetMapInfo(const string&in mapUid) {
-            const string funcName = "Http::Nadeo::GetMapInfo";
+        Json::Value@ GetMapInfoAsync(const string&in mapUid) {
+            const string funcName = "Http::Nadeo::GetMapInfoAsync";
 
             if (mapUid.Length == 0) {
                 Log::Warning(funcName, "mapUid blank");
