@@ -64,6 +64,7 @@ class Division {
     DivisionRuleType type          = DivisionRuleType::Unknown;
 
     Division() { }
+
     Division(Json::Value@ json) {
         if (true
             and json.HasKey("position")

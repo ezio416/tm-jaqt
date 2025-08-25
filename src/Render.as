@@ -3,6 +3,8 @@
 
 const vec4 rowBgColor = vec4(vec3(), 0.5f);
 
+FakePlayer@ devPlayer;
+
 void RenderMainTabs() {
     UI::BeginTabBar("##tabbar-main");
 
@@ -363,41 +365,115 @@ void RenderTabDev() {
     }
 
     UI::PushFont(UI::Font::DefaultBold, 26.0f);
-    UI::TextWrapped("Since you're in developer mode, I assume you know what you're doing!");
+    UI::TextWrapped(
+        "Since you're in developer mode, I assume you know what you're doing!"
+        " Don't complain if you break stuff in here!"
+    );
     UI::PopFont();
 
-    UI::SeparatorText("Me");
+    if (UI::TreeNode("Me", UI::TreeNodeFlags::Framed)) {
+        if (UI::Button("Get My Status")) {
+            startnew(GetMyStatusAsync);
+        }
 
-    if (UI::Button("Get My Status")) {
-        startnew(GetMyStatusAsync);
+        State::me.progression = Math::Clamp(
+            UI::InputInt("Progression", State::me.progression),
+            0,
+            10000
+        );
+
+        State::me.rank = Math::Clamp(
+            UI::InputInt("Rank", State::me.rank),
+            0,
+            1000000
+        );
+
+        State::me.hasPenalty = UI::Checkbox("Penalty", State::me.hasPenalty);
+
+        UI::TreePop();
     }
 
-    State::me.progression = Math::Clamp(
-        UI::InputInt("Progression", State::me.progression),
-        0,
-        10000
-    );
+    if (UI::TreeNode("Match Players", UI::TreeNodeFlags::Framed)) {
+        if (UI::Button("New")) {
+            @devPlayer = FakePlayer();
+        }
 
-    State::me.rank = Math::Clamp(
-        UI::InputInt("Rank", State::me.rank),
-        0,
-        1000000
-    );
+        if (devPlayer !is null) {
+            UI::SameLine();
+            if (UI::Button("Randomize")) {
+                const uint nameLength = Math::Rand(4, 20);
+                const string nameChars = "-012345679ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+                string char = " ";
+                devPlayer.name = "";
+                for (uint8 i = 0; i < nameLength; i++) {
+                    char[0] = nameChars[Math::Rand(0, 63)];
+                    devPlayer.name += char;
+                }
 
-    State::me.hasPenalty = UI::Checkbox("Penalty", State::me.hasPenalty);
+                devPlayer.progression = Math::Rand(0, 6969);
+                devPlayer.rank = Math::Rand(1, 200000);
+                devPlayer.score = Math::Rand(0, 50);
+                devPlayer.team = Math::Rand(1, 3);
+            }
 
-    UI::SeparatorText("Other");
-
-    if (UI::BeginCombo("Status", tostring(State::status), UI::ComboFlags::HeightLargest)) {
-        SimpleRanked::Status status;
-        for (uint i = 0; i < SimpleRanked::Status::_Count; i++) {
-            status = SimpleRanked::Status(i);
-            if (UI::Selectable(tostring(status), State::status == status)) {
-                State::status = status;
+            UI::SameLine();
+            if (UI::Button("Add")) {
+                State::players.Set(devPlayer.accountId, @devPlayer);
+                State::playersArr.InsertLast(devPlayer);
+                @devPlayer = null;
+            } else {
+                devPlayer.name        = UI::InputText("name", devPlayer.name);
+                devPlayer.progression = UI::InputInt("progression", devPlayer.progression);
+                devPlayer.rank        = UI::InputInt("rank", devPlayer.rank);
+                devPlayer.score       = UI::InputInt("score", devPlayer.score);
+                devPlayer.team        = UI::InputInt("team", devPlayer.team);
             }
         }
 
-        UI::EndCombo();
+        for (uint i = 0; i < State::playersArr.Length; i++) {
+            Player@ player = State::playersArr[i];
+
+            UI::Separator();
+
+            if (UI::Button("Remove##" + i)) {
+                State::playersArr.RemoveAt(i);
+                State::players.Delete(player.accountId);
+                break;
+            }
+
+            player.name        = UI::InputText("name##" + i, player.name);
+            player.progression = UI::InputInt("progression##" + i, player.progression);
+            player.rank        = UI::InputInt("rank##" + i, player.rank);
+
+            FakePlayer@ fake = cast<FakePlayer>(player);
+            if (fake !is null) {
+                fake.score = UI::InputInt("score##" + i, fake.score);
+                fake.team  = UI::InputInt("team##" + i, fake.team);
+            } else {
+                UI::BeginDisabled();
+                UI::InputInt("score##" + i, player.score);
+                UI::InputInt("team##" + i, player.team);
+                UI::EndDisabled();
+            }
+        }
+
+        UI::TreePop();
+    }
+
+    if (UI::TreeNode("Other", UI::TreeNodeFlags::Framed)) {
+        if (UI::BeginCombo("Status", tostring(State::status), UI::ComboFlags::HeightLargest)) {
+            SimpleRanked::Status status;
+            for (uint i = 0; i < SimpleRanked::Status::_Count; i++) {
+                status = SimpleRanked::Status(i);
+                if (UI::Selectable(tostring(status), State::status == status)) {
+                    State::status = status;
+                }
+            }
+
+            UI::EndCombo();
+        }
+
+        UI::TreePop();
     }
 
     UI::EndChild();

@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-24
+// m 2025-08-25
 
 enum FriendStatus {
     Online,
@@ -30,8 +30,8 @@ class Player {
         return GetPlayerDivision(progression, rank);
     }
 
-    private uint _score = 0;
-    uint get_score() {
+    protected int _score = 0;
+    int get_score() {
         if (true
             and !frozen
             and player !is null
@@ -43,7 +43,7 @@ class Player {
         return _score;
     }
 
-    private int _team = -1;
+    protected int _team = -1;
     int get_team() {
         if (true
             and !frozen
@@ -108,6 +108,28 @@ class Player {
 
     string ToString() {
         return Json::Write(ToJson());
+    }
+}
+
+class FakePlayer : Player {
+    FakePlayer() {
+        accountId = GenerateUUID();
+    }
+
+    int get_score() override {
+        return _score;
+    }
+
+    int get_team() override {
+        return _team;
+    }
+
+    void set_score(const int s) {
+        _score = s;
+    }
+
+    void set_team(const int t) {
+        _team = t;
     }
 }
 

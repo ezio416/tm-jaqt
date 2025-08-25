@@ -151,9 +151,3 @@ void RenderMenuMain() {
         UI::EndMenu();
     }
 }
-
-void PlaySound() {
-    if (sound !is null) {
-        Audio::Play(sound, S_Volume / 100.0f);
-    }
-}
