@@ -277,7 +277,7 @@ void RenderTabDebug() {
         UI::EndTabItem();
     }
 
-    if (UI::BeginTabItem(Icons::Users + " Players")) {
+    if (UI::BeginTabItem(Icons::Users + " Match Players")) {
         if (UI::BeginChild("##child-debug-players")) {
             for (uint i = 0; i < State::playersArr.Length; i++) {
                 if (i > 0) {
