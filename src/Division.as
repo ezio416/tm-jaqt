@@ -4,7 +4,7 @@
 const vec4[] divisionColors = {
     vec4(vec3(0.45f, 0.27f, 0.13f), 1.0f),
     vec4(vec3(0.44f), 1.0f),
-    vec4(vec3(0.82f, 0.56f, 0.0f), 1.0f),
+    vec4(vec3(0.85f, 0.65f, 0.0f), 1.0f),
     vec4(vec3(0.36f, 0.68f, 0.12f), 1.0f)
 };
 
