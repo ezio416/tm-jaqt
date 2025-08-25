@@ -65,6 +65,10 @@ void RenderRankedContents() {
 
     if (State::me.hasPenalty) {
         UI::Text("Immunity: " + State::me.immunityDays + " days (" + State::me.penalty + " pts)");
+
+        UI::SameLine();
+        UI::Text(Icons::InfoCircle);
+        UI::SetItemTooltip("After not playing for this many days, you will lose this many points each day thereafter.");
     }
 
     UI::EndGroup();
