@@ -300,12 +300,13 @@ void RenderTabFriends() {
     }
     UI::EndDisabled();
 
-    if (UI::BeginTable("##table-friends", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+    if (UI::BeginTable("##table-friends", 5, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
         UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
 
         UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
         UI::TableSetupColumn("online", UI::TableColumnFlags::WidthFixed, scale * 15.0f);
         UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
+        UI::TableSetupColumn("points", UI::TableColumnFlags::WidthFixed, scale * 60.0f);
         UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
 
         UI::ListClipper clipper(Partner::friends.Length);
@@ -369,6 +370,10 @@ void RenderTabFriends() {
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
                 UI::Text(friend.name);
+
+                UI::TableNextColumn();
+                UI::AlignTextToFramePadding();
+                UI::Text(tostring(friend.progression) + " pts");
 
                 UI::TableNextColumn();
                 friend.division.RenderIcon(UI::GetScale() * 24.0f, true);
@@ -459,12 +464,13 @@ void RenderTabRecent() {
     }
     UI::EndDisabled();
 
-    if (UI::BeginTable("##table-recent", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+    if (UI::BeginTable("##table-recent", 5, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
         UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
 
         UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
         UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
         UI::TableSetupColumn("time",   UI::TableColumnFlags::WidthFixed, scale * 80.0f);
+        UI::TableSetupColumn("points", UI::TableColumnFlags::WidthFixed, scale * 60.0f);
         UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
 
         UI::ListClipper clipper(Partner::recent.Length);
@@ -508,6 +514,10 @@ void RenderTabRecent() {
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
                 UI::Text(Time::FormatString(Time::Stamp - player.lastMatch >= 86400 ? "%F" : "%T", player.lastMatch));
+
+                UI::TableNextColumn();
+                UI::AlignTextToFramePadding();
+                UI::Text(tostring(player.progression) + " pts");
 
                 UI::TableNextColumn();
                 player.division.RenderIcon(UI::GetScale() * 24.0f, true);
@@ -559,11 +569,12 @@ void RenderTabSearch() {
     }
     UI::EndDisabled();
 
-    if (UI::BeginTable("##table-search", 3, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+    if (UI::BeginTable("##table-search", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
         UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
 
         UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
         UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
+        UI::TableSetupColumn("points", UI::TableColumnFlags::WidthFixed, scale * 60.0f);
         UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
 
         UI::ListClipper clipper(Partner::search.Length);
@@ -603,6 +614,10 @@ void RenderTabSearch() {
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
                 UI::Text(player.name.Length > 0 ? player.name : player.accountId);
+
+                UI::TableNextColumn();
+                UI::AlignTextToFramePadding();
+                UI::Text(tostring(player.progression) + " pts");
 
                 UI::TableNextColumn();
                 player.division.RenderIcon(UI::GetScale() * 24.0f, true);
