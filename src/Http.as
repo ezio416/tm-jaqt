@@ -103,6 +103,8 @@ namespace Http {
                 ids.RemoveRange(0, count);
             }
 
+            Log::ResponseToFile(funcName, ret);
+
             return ret;
         }
 
