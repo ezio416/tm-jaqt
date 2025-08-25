@@ -190,3 +190,15 @@ void GetMyStatusAsync() {
         Log::Warning(funcName, "error getting my rank");
     }
 }
+
+bool SortPlayersAsc(Player@&in a, Player@&in b) {
+    if (a.status != b.status) {
+        return a.status < b.status;
+    }
+
+    if (a.team != b.team) {
+        return a.team < b.team;
+    }
+
+    return a.name.ToLower() < b.name.ToLower();
+}

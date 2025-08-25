@@ -1,5 +1,5 @@
 // c 2025-08-22
-// m 2025-08-24
+// m 2025-08-25
 
 namespace Partner {
     Player@[]    friends;
@@ -286,13 +286,5 @@ namespace Partner {
         }
 
         searching = false;
-    }
-
-    bool SortPlayersAsc(Player@&in a, Player@&in b) {
-        if (a.status != b.status) {
-            return a.status < b.status;
-        }
-
-        return a.name.ToLower() < b.name.ToLower();
     }
 }

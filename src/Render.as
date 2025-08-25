@@ -141,8 +141,6 @@ void RenderRankedContents() {
         or State::status == SimpleRanked::Status::InMatch
         or State::status == SimpleRanked::Status::MatchEnd
     ) {
-        Player@ player;
-
         if (UI::BeginTable("##table-players", 4, UI::TableFlags::SizingStretchProp)) {
             UI::TableSetupColumn("team",   UI::TableColumnFlags::WidthFixed, scale * 20.0f);
             UI::TableSetupColumn("points", UI::TableColumnFlags::WidthFixed, scale * 20.0f);
@@ -150,17 +148,7 @@ void RenderRankedContents() {
             UI::TableSetupColumn("name");
 
             for (uint i = 0; i < State::playersArr.Length; i++) {
-                @player = State::playersArr[i];
-                if (player.team == 1) {
-                    RenderPlayerRow(player);
-                }
-            }
-
-            for (uint i = 0; i < State::playersArr.Length; i++) {
-                @player = State::playersArr[i];
-                if (player.team == 2) {
-                    RenderPlayerRow(player);
-                }
+                RenderPlayerRow(State::playersArr[i]);
             }
 
             UI::EndTable();
@@ -201,7 +189,18 @@ void RenderPlayerRow(Player@ player) {
 
     UI::TableNextColumn();
     UI::AlignTextToFramePadding();
-    UI::Text((player.team == 1 ? "\\$66F" : "\\$F66") + Icons::Circle);
+    switch (player.team) {
+        case 1:  // blue
+            UI::Text("\\$66F" + Icons::Circle);
+            break;
+
+        case 2:  // red
+            UI::Text("\\$F66" + Icons::Circle);
+            break;
+
+        default:
+            UI::Text("\\$666" + Icons::Circle);
+    }
 
     UI::TableNextColumn();
     UI::AlignTextToFramePadding();
@@ -427,6 +426,20 @@ void RenderTabDev() {
                 devPlayer.rank        = UI::InputInt("rank", devPlayer.rank);
                 devPlayer.score       = UI::InputInt("score", devPlayer.score);
                 devPlayer.team        = UI::InputInt("team", devPlayer.team);
+            }
+        }
+
+        if (State::playersArr.Length > 0) {
+            UI::SeparatorText("Existing");
+
+            if (UI::Button("Clear")) {
+                State::players.DeleteAll();
+                State::playersArr = {};
+            }
+
+            UI::SameLine();
+            if (UI::Button("Sort")) {
+                State::playersArr.SortNonConst(SortPlayersAsc);
             }
         }
 
