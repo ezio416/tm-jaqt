@@ -441,10 +441,10 @@ void RenderTabDev() {
                 State::playersArr = {};
             }
 
-            UI::SameLine();
-            if (UI::Button("Sort")) {
-                State::playersArr.SortNonConst(SortPlayersAsc);
-            }
+            // UI::SameLine();
+            // if (UI::Button("Sort")) {
+            //     State::playersArr.SortNonConst(SortPlayersAsc);
+            // }
         }
 
         for (uint i = 0; i < State::playersArr.Length; i++) {
