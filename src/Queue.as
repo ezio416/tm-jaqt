@@ -178,7 +178,7 @@ void StartQueueAsync() {
                                     }
                                 }
 
-                                State::playersArr.SortNonConst(SortPlayersAsc);
+                                // State::playersArr.SortNonConst(SortPlayersAsc);
 
                                 Json::Value@ leaderboard = Http::Nadeo::GetLeaderboardPlayersAsync(State::players.GetKeys());
                                 if (leaderboard !is null) {

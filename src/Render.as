@@ -148,7 +148,15 @@ void RenderRankedContents() {
             UI::TableSetupColumn("name");
 
             for (uint i = 0; i < State::playersArr.Length; i++) {
-                RenderPlayerRow(State::playersArr[i]);
+                if (State::playersArr[i].team == 1) {
+                    RenderPlayerRow(State::playersArr[i]);
+                }
+            }
+
+            for (uint i = 0; i < State::playersArr.Length; i++) {
+                if (State::playersArr[i].team == 2) {
+                    RenderPlayerRow(State::playersArr[i]);
+                }
             }
 
             UI::EndTable();
