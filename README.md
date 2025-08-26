@@ -1,7 +1,7 @@
 ![Signed](https://img.shields.io/badge/Signed-No-FF3333)
 ![Game Trackmania](https://img.shields.io/badge/Game-Trackmania-blue)
 
-# Simple Ranked
+# JAQT (Just Another Queue Tool)
 
 Queue for 2v2.
 

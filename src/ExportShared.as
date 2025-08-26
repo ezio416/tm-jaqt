@@ -1,7 +1,7 @@
 // c 2025-08-25
 // m 2025-08-25
 
-namespace SimpleRanked {
+namespace JAQT {
     shared enum Status {
         NotQueued,
         Queueing,

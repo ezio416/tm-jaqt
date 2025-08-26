@@ -93,7 +93,7 @@ class Match {
 
         App.ManiaPlanetScriptAPI.OpenLink(joinLink, CGameManiaPlanetScriptAPI::ELinkType::ManialinkBrowser);
 
-        State::SetStatus(SimpleRanked::Status::Joining);
+        State::SetStatus(JAQT::Status::Joining);
 
         return true;
     }

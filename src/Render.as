@@ -83,8 +83,8 @@ void RenderRankedContents() {
     UI::PushFont(UI::Font::DefaultBold, 24.0f);
 
     switch (State::status) {
-        case SimpleRanked::Status::NotQueued:
-        case SimpleRanked::Status::MatchEnd:
+        case JAQT::Status::NotQueued:
+        case JAQT::Status::MatchEnd:
             if (UI::Button(
                 Icons::Play + " Queue" + (Partner::exists ? " with " + Partner::partner.name : ""),
                 buttonSize
@@ -93,20 +93,20 @@ void RenderRankedContents() {
             }
             break;
 
-        case SimpleRanked::Status::MatchFound:
-        case SimpleRanked::Status::Joining:
+        case JAQT::Status::MatchFound:
+        case JAQT::Status::Joining:
             UI::BeginDisabled();
             UI::Button(Icons::ClockO + " Joining Match", buttonSize);
             UI::EndDisabled();
             break;
 
-        case SimpleRanked::Status::InMatch:
+        case JAQT::Status::InMatch:
             UI::BeginDisabled();
             UI::Button(Icons::Kenney::SignIn + " In Match", buttonSize );
             UI::EndDisabled();
             break;
 
-        case SimpleRanked::Status::Banned:
+        case JAQT::Status::Banned:
             UI::BeginDisabled();
             UI::Button(Icons::Ban + " Banned", buttonSize);
             UI::EndDisabled();
@@ -116,9 +116,9 @@ void RenderRankedContents() {
             UI::BeginDisabled(false
                 or State::cancel
                 or (true
-                    and State::status != SimpleRanked::Status::Queueing
-                    and State::status != SimpleRanked::Status::WaitingForPartner
-                    and State::status != SimpleRanked::Status::Queued
+                    and State::status != JAQT::Status::Queueing
+                    and State::status != JAQT::Status::WaitingForPartner
+                    and State::status != JAQT::Status::Queued
                 )
             );
             if (UI::ButtonColored(
@@ -138,8 +138,8 @@ void RenderRankedContents() {
     }
 
     if (false
-        or State::status == SimpleRanked::Status::InMatch
-        or State::status == SimpleRanked::Status::MatchEnd
+        or State::status == JAQT::Status::InMatch
+        or State::status == JAQT::Status::MatchEnd
     ) {
         if (UI::BeginTable("##table-players", 4, UI::TableFlags::SizingStretchProp)) {
             UI::TableSetupColumn("team",   UI::TableColumnFlags::WidthFixed, scale * 20.0f);
@@ -225,23 +225,23 @@ void RenderStatusBar() {
         string text = "\\$AAA ";
 
         switch (State::status) {
-            case SimpleRanked::Status::NotQueued:
+            case JAQT::Status::NotQueued:
                 text += "Not in Queue";
                 break;
 
-            case SimpleRanked::Status::WaitingForPartner:
+            case JAQT::Status::WaitingForPartner:
                 text += "Waiting for Partner";
                 break;
 
-            case SimpleRanked::Status::MatchFound:
+            case JAQT::Status::MatchFound:
                 text += "Match Found";
                 break;
 
-            case SimpleRanked::Status::InMatch:
+            case JAQT::Status::InMatch:
                 text += "In Match";
                 break;
 
-            case SimpleRanked::Status::MatchEnd:
+            case JAQT::Status::MatchEnd:
                 text += "End of Match";
                 break;
 
@@ -250,9 +250,9 @@ void RenderStatusBar() {
         }
 
         switch (State::status) {
-            case SimpleRanked::Status::Queueing:
-            case SimpleRanked::Status::WaitingForPartner:
-            case SimpleRanked::Status::Queued:
+            case JAQT::Status::Queueing:
+            case JAQT::Status::WaitingForPartner:
+            case JAQT::Status::Queued:
                 text += "  " + Time::Format((Time::Stamp - State::queueStart) * 1000, false);
         }
 
@@ -475,9 +475,9 @@ void RenderTabDev() {
 
     if (UI::TreeNode("Other", UI::TreeNodeFlags::Framed)) {
         if (UI::BeginCombo("Status", tostring(State::status), UI::ComboFlags::HeightLargest)) {
-            SimpleRanked::Status status;
-            for (uint i = 0; i < SimpleRanked::Status::_Count; i++) {
-                status = SimpleRanked::Status(i);
+            JAQT::Status status;
+            for (uint i = 0; i < JAQT::Status::_Count; i++) {
+                status = JAQT::Status(i);
                 if (UI::Selectable(tostring(status), State::status == status)) {
                     State::status = status;
                 }

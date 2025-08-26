@@ -7,25 +7,25 @@ void StartQueueAsync() {
     const string funcName = "StartQueueAsync";
 
     if (true
-        and State::status != SimpleRanked::Status::NotQueued
-        and State::status != SimpleRanked::Status::MatchEnd
+        and State::status != JAQT::Status::NotQueued
+        and State::status != JAQT::Status::MatchEnd
     ) {
         Log::Warning(funcName, "can't start queue, status: " + tostring(State::status));
         return;
     }
 
-    State::SetStatus(SimpleRanked::Status::Queueing);
+    State::SetStatus(JAQT::Status::Queueing);
     State::queueStart = Time::Stamp;
 
     while (false
-        or State::status == SimpleRanked::Status::Queueing
-        or State::status == SimpleRanked::Status::WaitingForPartner
-        or State::status == SimpleRanked::Status::Queued
+        or State::status == JAQT::Status::Queueing
+        or State::status == JAQT::Status::WaitingForPartner
+        or State::status == JAQT::Status::Queued
     ) {
         if (State::cancel) {
             State::cancel = false;
             State::frozen = false;
-            State::SetStatus(SimpleRanked::Status::NotQueued);
+            State::SetStatus(JAQT::Status::NotQueued);
             break;
         }
 
@@ -35,7 +35,7 @@ void StartQueueAsync() {
             if (State::cancel) {
                 State::cancel = false;
                 State::frozen = false;
-                State::SetStatus(SimpleRanked::Status::NotQueued);
+                State::SetStatus(JAQT::Status::NotQueued);
                 break;
             }
         }
@@ -52,7 +52,7 @@ void StartQueueAsync() {
                         : Json::Write(heartbeat["banEndDate"])
                     )
                 );
-                State::SetStatus(SimpleRanked::Status::Banned);
+                State::SetStatus(JAQT::Status::Banned);
                 break;
             }
 
@@ -60,12 +60,12 @@ void StartQueueAsync() {
                 and heartbeat.HasKey("status")
                 and heartbeat["status"].GetType() == Json::Type::String
             ) {
-                const SimpleRanked::Status prev = State::status;
+                const JAQT::Status prev = State::status;
 
                 State::SetStatus(string(heartbeat["status"]));
 
                 if (true
-                    and prev == SimpleRanked::Status::WaitingForPartner
+                    and prev == JAQT::Status::WaitingForPartner
                     and State::status != prev
                 ) {
                     State::queueStart = Time::Stamp;
@@ -152,7 +152,7 @@ void StartQueueAsync() {
                     yield();
                 }
 
-                State::SetStatus(SimpleRanked::Status::InMatch);
+                State::SetStatus(JAQT::Status::InMatch);
 
                 auto App = cast<CTrackMania>(GetApp());
                 uint playerCount = 0;
@@ -230,7 +230,7 @@ void StartQueueAsync() {
 
                         if (State::match.status == MatchStatus::COMPLETED) {
                             Log::Info(funcName, "match completed");
-                            State::SetStatus(SimpleRanked::Status::MatchEnd);
+                            State::SetStatus(JAQT::Status::MatchEnd);
 
                             State::mapName         = "";
                             @State::mapThumbnail   = null;
@@ -263,7 +263,7 @@ void StartQueueAsync() {
 
                 State::players.DeleteAll();
                 State::playersArr = {};
-                State::SetStatus(SimpleRanked::Status::NotQueued);
+                State::SetStatus(JAQT::Status::NotQueued);
                 State::frozen = false;
 
                 break;

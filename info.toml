@@ -1,5 +1,5 @@
 [meta]
-name = "Simple Ranked"
+name = "Just Another Queue Tool"
 author = "Ezio"
 category = "Matchmaking"
 version = "0.1.4"
@@ -9,5 +9,5 @@ siteid = 758
 dependencies = [ "NadeoServices" ]
 export_dependencies = [ "NadeoServices" ]
 exports = [ "src/Export.as" ]
-module = "SimpleRanked"
+module = "JAQT"
 shared_exports = [ "src/ExportShared" ]
