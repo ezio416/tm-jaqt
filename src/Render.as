@@ -220,6 +220,7 @@ void RenderPlayerRow(Player@ player) {
     UI::TableNextColumn();
     UI::AlignTextToFramePadding();
     UI::Text(player.name);
+    UI::SetItemTooltip("Progression: " + player.progression + " pts");
 }
 
 void RenderSoundTestButton() {
@@ -292,12 +293,7 @@ void RenderTabDebug() {
                     UI::Separator();
                 }
 
-                // UI::TextWrapped(Json::Write(State::playersArr[i].ToJson(), true));
-                UI::Text("name: "        + State::playersArr[i].name);
-                UI::Text("progression: " + State::playersArr[i].progression);
-                UI::Text("div name: "    + State::playersArr[i].division.name);
-                UI::Text("team: "        + State::playersArr[i].team);
-                UI::Text("score: "       + State::playersArr[i].score);
+                UI::TextWrapped(Json::Write(State::playersArr[i].ToJson(), true));
             }
         }
 
@@ -395,7 +391,7 @@ void RenderTabDev() {
             1000000
         );
 
-        State::me.hasPenalty = UI::Checkbox("Penalty", State::me.hasPenalty);
+        State::me.hasPenalty = UI::Checkbox("Has Penalty", State::me.hasPenalty);
 
         UI::TreePop();
     }

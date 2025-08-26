@@ -93,6 +93,7 @@ class Player {
 
         ret["accountId"]    = accountId;
         ret["division"]     = division.ToJson();
+        ret["frozen"]       = frozen;
         ret["hasPenalty"]   = hasPenalty;
         ret["immunityDays"] = immunityDays;
         ret["name"]         = name;
