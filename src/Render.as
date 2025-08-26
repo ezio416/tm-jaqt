@@ -663,7 +663,7 @@ void RenderTabRecent() {
         UI::ListClipper clipper(Partner::recent.Length);
         while (clipper.Step()) {
             for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-                Player@ player = Partner::recent[i];
+                Player@ player = Partner::recent[Partner::recent.Length - 1 - i];
 
                 UI::TableNextRow();
 
