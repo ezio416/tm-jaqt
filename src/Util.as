@@ -1,8 +1,9 @@
 // c 2025-08-25
 // m 2025-08-25
 
-const string  uuidChars  = "0123456789abcdef";
-const uint8[] uuidDashes = { 2, 3, 4, 5 };
+Audio::Sample@ sound;
+const string   uuidChars  = "0123456789abcdef";
+const uint8[]  uuidDashes = { 2, 3, 4, 5 };
 
 string GenerateUUID() {
     string uuid;

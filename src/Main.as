@@ -12,8 +12,6 @@ string get_pluginTitle() {
     return pluginColor + pluginIcon + "\\$G " + pluginMeta.Name;
 }
 
-Audio::Sample@ sound;
-
 void Main() {
     @sound = Audio::LoadSample("assets/MatchFound.wav");
 
