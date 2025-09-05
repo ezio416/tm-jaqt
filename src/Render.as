@@ -515,7 +515,7 @@ void RenderTabFriends() {
     }
     UI::EndDisabled();
 
-    if (UI::BeginTable("##table-friends", 5, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+    if (UI::BeginTable("##table-friends", 6, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
         UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
 
         UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
@@ -523,6 +523,7 @@ void RenderTabFriends() {
         UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
         UI::TableSetupColumn("points", UI::TableColumnFlags::WidthFixed, scale * 60.0f);
         UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+        UI::TableSetupColumn("tmio",   UI::TableColumnFlags::WidthFixed, scale * 35.0f);
 
         UI::ListClipper clipper(Partner::friends.Length);
         while (clipper.Step()) {
@@ -568,6 +569,12 @@ void RenderTabFriends() {
 
                 UI::TableNextColumn();
                 player.division.RenderIcon(scale * 24.0f, true);
+
+                UI::TableNextColumn();
+                if (UI::ButtonColored(Icons::Heartbeat + "##" + i, 0.6f)) {
+                    OpenBrowserURL("https://trackmania.io/#/player/" + player.accountId);
+                }
+                UI::SetItemTooltip("Trackmania.io profile");
             }
         }
 
@@ -655,7 +662,7 @@ void RenderTabRecent() {
     }
     UI::EndDisabled();
 
-    if (UI::BeginTable("##table-recent", 5, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+    if (UI::BeginTable("##table-recent", 6, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
         UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
 
         UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
@@ -663,6 +670,7 @@ void RenderTabRecent() {
         UI::TableSetupColumn("time",   UI::TableColumnFlags::WidthFixed, scale * 80.0f);
         UI::TableSetupColumn("points", UI::TableColumnFlags::WidthFixed, scale * 60.0f);
         UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+        UI::TableSetupColumn("tmio",   UI::TableColumnFlags::WidthFixed, scale * 35.0f);
 
         UI::ListClipper clipper(Partner::recent.Length);
         while (clipper.Step()) {
@@ -690,6 +698,12 @@ void RenderTabRecent() {
 
                 UI::TableNextColumn();
                 player.division.RenderIcon(scale * 24.0f, true);
+
+                UI::TableNextColumn();
+                if (UI::ButtonColored(Icons::Heartbeat + "##" + i, 0.6f)) {
+                    OpenBrowserURL("https://trackmania.io/#/player/" + player.accountId);
+                }
+                UI::SetItemTooltip("Trackmania.io profile");
             }
         }
 
@@ -738,13 +752,14 @@ void RenderTabSearch() {
     }
     UI::EndDisabled();
 
-    if (UI::BeginTable("##table-search", 4, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
+    if (UI::BeginTable("##table-search", 5, UI::TableFlags::RowBg | UI::TableFlags::ScrollY)) {
         UI::PushStyleColor(UI::Col::TableRowBgAlt, rowBgColor);
 
         UI::TableSetupColumn("button", UI::TableColumnFlags::WidthFixed, scale * 30.0f);
         UI::TableSetupColumn("name",   UI::TableColumnFlags::WidthStretch);
         UI::TableSetupColumn("points", UI::TableColumnFlags::WidthFixed, scale * 60.0f);
         UI::TableSetupColumn("rank",   UI::TableColumnFlags::WidthFixed, scale * 30.0f);
+        UI::TableSetupColumn("tmio",   UI::TableColumnFlags::WidthFixed, scale * 35.0f);
 
         UI::ListClipper clipper(Partner::search.Length);
         while (clipper.Step()) {
@@ -766,6 +781,12 @@ void RenderTabSearch() {
 
                 UI::TableNextColumn();
                 player.division.RenderIcon(scale * 24.0f, true);
+
+                UI::TableNextColumn();
+                if (UI::ButtonColored(Icons::Heartbeat + "##" + i, 0.6f)) {
+                    OpenBrowserURL("https://trackmania.io/#/player/" + player.accountId);
+                }
+                UI::SetItemTooltip("Trackmania.io profile");
             }
         }
 
