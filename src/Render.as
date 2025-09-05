@@ -1,5 +1,5 @@
 // c 2025-07-03
-// m 2025-08-25
+// m 2025-09-04
 
 const vec4 rowBgColor = vec4(vec3(), 0.5f);
 
@@ -682,7 +682,7 @@ void RenderTabRecent() {
                 UI::AlignTextToFramePadding();
                 UI::Text(Time::FormatString(Time::Stamp - player.lastMatch >= 86400 ? "%F" : "%T", player.lastMatch));
                 UI::SetItemTooltip(Time::FormatString("%F %T", player.lastMatch) + "\n"
-                    + Time::Format((Time::Stamp - player.lastMatch) * 1000, false) + " ago");
+                    + FormatSeconds(Time::Stamp - player.lastMatch) + " ago");
 
                 UI::TableNextColumn();
                 UI::AlignTextToFramePadding();
