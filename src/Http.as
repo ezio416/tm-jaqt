@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-24
+// m 2025-09-04
 
 namespace Http {
     namespace Nadeo {
@@ -9,9 +9,13 @@ namespace Http {
         const uint64 waitTime      = 500;
 
         void CancelQueueAsync() {
+            const string funcName = "Http::Nadeo::CancelQueueAsync";
             State::cancel = true;
-            Log::Info("Http::Nadeo::CancelQueueAsync", "canceling queue");
-            PostMeetAsync("/matchmaking/ranked-2v2/cancel");
+            Log::Info(funcName, "canceling queue");
+            Json::Value@ req = PostMeetAsync("/matchmaking/ranked-2v2/cancel");
+            if (req !is null) {
+                Log::ResponseToFile(funcName, req);
+            }
         }
 
         Json::Value@ GetDivisionDisplayRulesAsync() {
