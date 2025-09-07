@@ -1,5 +1,5 @@
 // c 2025-07-02
-// m 2025-08-25
+// m 2025-09-07
 
 enum FriendStatus {
     Online,
@@ -166,6 +166,9 @@ void GetMyStatusAsync() {
             and inactivity["immunityDays"].GetType() == Json::Type::Number
         ) {
             State::me.immunityDays = uint(inactivity["immunityDays"]);
+            if (State::me.immunityDays == uint(-1)) {
+                State::me.immunityDays = 0;
+            }
         }
 
         if (true

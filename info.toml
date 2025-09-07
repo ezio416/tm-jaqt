@@ -2,7 +2,7 @@
 name = "Just Another Queue Tool"
 author = "Ezio"
 category = "Matchmaking"
-version = "0.1.6"
+version = "0.1.7"
 siteid = 758
 
 [script]
