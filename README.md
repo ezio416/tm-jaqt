@@ -1,4 +1,6 @@
-![Signed](https://img.shields.io/badge/Signed-No-FF3333)
+![Signed](https://img.shields.io/badge/Signed-Yes-00AA00)
+![Number of downloads](https://img.shields.io/badge/dynamic/json?query=downloads&url=https%3A%2F%2Fopenplanet.dev%2Fapi%2Fplugin%2F758&label=Downloads&color=purple)
+![Version](https://img.shields.io/badge/dynamic/json?query=version&url=https%3A%2F%2Fopenplanet.dev%2Fapi%2Fplugin%2F758&label=Version&color=red)
 ![Game Trackmania](https://img.shields.io/badge/Game-Trackmania-blue)
 
 # JAQT (Just Another Queue Tool)
@@ -9,9 +11,6 @@ Inspired by AFK Queue Tool and works if your partner is using that plugin instea
 
 Thank you Fort for helping test and critique the plugin before release!
 
-<!-- ![Signed](https://img.shields.io/badge/Signed-Yes-00AA00) -->
 <!-- ![Signed](https://img.shields.io/badge/Signed-School_Mode-CC1199) -->
-<!-- ![Number of downloads](https://img.shields.io/badge/dynamic/json?query=downloads&url=https%3A%2F%2Fopenplanet.dev%2Fapi%2Fplugin%2F758&label=Downloads&color=purple) -->
-<!-- ![Version](https://img.shields.io/badge/dynamic/json?query=version&url=https%3A%2F%2Fopenplanet.dev%2Fapi%2Fplugin%2F758&label=Version&color=red) -->
 <!-- ![Game Maniaplanet](https://img.shields.io/badge/Game-Maniaplanet_4-blue) -->
 <!-- ![Game Turbo](https://img.shields.io/badge/Game-Turbo-blue) -->
