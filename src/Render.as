@@ -77,7 +77,10 @@ void RenderRankedContents() {
 
         UI::SameLine();
         UI::Text(Icons::InfoCircle);
-        UI::SetItemTooltip("After not playing for this many days, you will lose this many points each day thereafter.");
+        UI::SetItemTooltip(
+            "After not playing for this many days, you will lose this many points each day thereafter."
+            "\nEvery match you finish will earn you 2 immunity days up to a maximum of 10."
+        );
     }
 
     UI::EndGroup();
