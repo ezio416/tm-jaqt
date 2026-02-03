@@ -59,9 +59,16 @@ void RenderRankedContents() {
 
     UI::Text("Points: " + State::me.progression);
 
-    string rank = "Rank: " + State::me.rank;
+    string rank = "Rank: ";
     if (State::activePlayers > 0) {
-        rank += " / " + State::activePlayers + Text::Format(" (top %.1f%%)", float(State::me.rank) / State::activePlayers * 100.0f);
+        const int min = Math::Min(State::me.rank, State::activePlayers);
+        rank += tostring(min);
+        rank += " / " + State::activePlayers + Text::Format(
+            " (top %.1f%%)",
+            float(min) / State::activePlayers * 100.0f
+        );
+    } else {
+        rank += tostring(State::me.rank);
     }
     UI::Text(rank);
 
