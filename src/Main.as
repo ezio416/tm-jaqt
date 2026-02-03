@@ -75,7 +75,7 @@ void Render() {
     if (UI::Begin(
         pluginTitle + "\\$666 v" + pluginMeta.Version + "###main-" + pluginMeta.ID,
         S_Enabled,
-        UI::WindowFlags::MenuBar
+        UI::GetDefaultWindowFlags() | UI::WindowFlags::MenuBar
     )) {
         RenderStatusBar();
         RenderMainTabs();
