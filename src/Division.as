@@ -1,6 +1,3 @@
-// c 2025-07-02
-// m 2025-08-25
-
 const vec4[] divisionColors = {
     vec4(vec3(0.45f, 0.27f, 0.13f), 1.0f),
     vec4(vec3(0.44f), 1.0f),

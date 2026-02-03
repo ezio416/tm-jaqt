@@ -1,6 +1,3 @@
-// c 2025-08-25
-// m 2025-09-04
-
 Audio::Sample@ sound;
 const string   uuidChars  = "0123456789abcdef";
 const uint8[]  uuidDashes = { 2, 3, 4, 5 };

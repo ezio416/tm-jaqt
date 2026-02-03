@@ -1,6 +1,3 @@
-// c 2025-07-02
-// m 2025-09-07
-
 enum FriendStatus {
     Online,
     Away,

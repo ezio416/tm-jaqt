@@ -1,6 +1,3 @@
-// c 2025-07-03
-// m 2025-09-04
-
 const vec4 rowBgColor = vec4(vec3(), 0.5f);
 
 FakePlayer@ devPlayer;

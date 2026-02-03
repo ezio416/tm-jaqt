@@ -1,6 +1,3 @@
-// c 2025-07-03
-// m 2025-08-25
-
 namespace State {
     uint         activePlayers = 0;
     bool         cancel        = false;

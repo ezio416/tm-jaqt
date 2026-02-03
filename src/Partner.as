@@ -1,6 +1,3 @@
-// c 2025-08-22
-// m 2025-08-25
-
 namespace Partner {
     Player@[]    friends;
     bool         gettingFriends = false;

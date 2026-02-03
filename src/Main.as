@@ -1,6 +1,3 @@
-// c 2025-07-02
-// m 2025-08-25
-
 const string  pluginIcon = Icons::Gamepad;
 Meta::Plugin@ pluginMeta = Meta::ExecutingPlugin();
 

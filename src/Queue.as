@@ -1,6 +1,3 @@
-// c 2025-07-02
-// m 2025-08-25
-
 uint64 lastMatchInfoRequest = 0;
 
 void StartQueueAsync() {
