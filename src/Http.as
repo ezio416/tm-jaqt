@@ -46,7 +46,7 @@ namespace Http {
             }
 
             if (accountIds.Length <= maxIds) {
-                const string endpoint = "/matchmaking/ranked-2v2/leaderboard/players?players[]=" + string::Join(accountIds, "&players[]=");
+                const string endpoint = "/matchmaking/ranked-2v2/leaderboard/players?players[]=" + Text::Join(accountIds, "&players[]=");
                 Json::Value@ response = GetMeetAsync(endpoint);
 
                 Log::Debug(funcName, endpoint + " | " + Json::Write(response));
@@ -76,7 +76,7 @@ namespace Http {
                     idsThisRequest.InsertLast(ids[i]);
                 }
 
-                endpoint = "/matchmaking/ranked-2v2/leaderboard/players?players[]=" + string::Join(idsThisRequest, "&players[]=");
+                endpoint = "/matchmaking/ranked-2v2/leaderboard/players?players[]=" + Text::Join(idsThisRequest, "&players[]=");
                 Json::Value@ response = GetMeetAsync(endpoint);
 
                 Log::Debug(funcName, endpoint + " | " + Json::Write(response));
