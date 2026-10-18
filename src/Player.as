@@ -9,12 +9,12 @@ class Player {
     string       accountId;
     bool         frozen       = false;
     bool         hasPenalty   = false;
+    uint         id           = 0x0;
     uint         immunityDays = 0;
     int64        lastMatch    = 0;
     string       name;
     FriendStatus status       = FriendStatus::Offline;
     int          penalty      = 0;
-    CSmPlayer@   player;
     uint         progression  = 0;
     uint         rank         = 0;
     bool         self         = false;
@@ -29,37 +29,76 @@ class Player {
 
     protected int _score = 0;
     int get_score() {
-        if (true
-            and !frozen
-            and player !is null
-            and player.Score !is null
-        ) {
-            _score = player.Score.Points;
+        if (id == 0x0) {
+            return 0;
         }
 
-        return _score;
+        if (frozen) {
+            return _score;
+        }
+
+        auto App = cast<CTrackMania>(GetApp());
+
+        auto Playground = cast<CSmArenaClient>(App.CurrentPlayground);
+        if (Playground is null) {
+            return (_score = 0);
+        }
+
+        for (uint i = Playground.Players.Length; i --> 0;) {
+            auto Player = cast<CSmPlayer>(Playground.Players[i]);
+            if (false
+                or Player is null
+                or Player.Score is null
+                or Player.Id.Value != id
+            ) {
+                continue;
+            }
+
+            return (_score = Player.Score.Points);
+        }
+
+        return 0;
     }
 
     protected int _team = -1;
     int get_team() {
-        if (true
-            and !frozen
-            and player !is null
-            and player.Score !is null
-        ) {
-            _team = player.Score.TeamNum;
+        if (id == 0x0) {
+            return -1;
         }
 
-        return _team;
+        if (frozen) {
+            return _team;
+        }
+
+        auto App = cast<CTrackMania>(GetApp());
+
+        auto Playground = cast<CSmArenaClient>(App.CurrentPlayground);
+        if (Playground is null) {
+            return (_team = -1);
+        }
+
+        for (uint i = Playground.Players.Length; i --> 0;) {
+            auto Player = cast<CSmPlayer>(Playground.Players[i]);
+            if (false
+                or Player is null
+                or Player.Score is null
+                or Player.Id.Value != id
+            ) {
+                continue;
+            }
+
+            return (_team = Player.Score.TeamNum);
+        }
+
+        return -1;
     }
 
     Player() { }
 
     Player(CSmPlayer@ player) {
-        accountId    = player.User.WebServicesUserId;
-        name         = player.User.Name;
-        @this.player = player;
-        this.player.MwAddRef();
+        accountId = player.User.WebServicesUserId;
+        id        = player.Id.Value;
+        name      = player.User.Name;
     }
 
     Player(CFriend@ friend) {
